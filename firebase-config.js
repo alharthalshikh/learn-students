@@ -149,6 +149,36 @@ const AuthService = {
             'auth/network-request-failed': 'خطأ في الاتصال بالإنترنت'
         };
         return errors[code] || 'حدث خطأ غير متوقع. حاول مجدداً';
+    },
+
+    // تسجيل الدخول بجوجل
+    async loginWithGoogle() {
+        try {
+            const provider = new firebase.auth.GoogleAuthProvider();
+            const result = await auth.signInWithPopup(provider);
+            const user = result.user;
+
+            const userDoc = await db.collection('users').doc(user.uid).get();
+            if (!userDoc.exists) {
+                await db.collection('users').doc(user.uid).set({
+                    uid: user.uid,
+                    name: user.displayName || 'مستخدم جديد',
+                    email: user.email,
+                    role: 'student', 
+                    gradeId: 'g12',  
+                    phone: '',
+                    avatar: user.photoURL || '🧑‍🎓',
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    completedLessons: [],
+                    streak: 1,
+                    lastActive: new Date().toDateString()
+                });
+            }
+            return { success: true, user };
+        } catch (error) {
+            console.error('Google Login Error:', error);
+            return { success: false, error: error.message };
+        }
     }
 };
 

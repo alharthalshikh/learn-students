@@ -170,6 +170,15 @@
         .btn-auth:active { transform: translateY(0); }
         .btn-auth:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
 
+        .btn-google {
+            width: 100%; padding: 12px; border-radius: 12px; border: 1px solid var(--glass-border);
+            background: rgba(255,255,255,0.05); color: var(--text-primary); font-weight: 700;
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+            cursor: pointer; transition: 0.3s; font-family: 'Cairo'; margin-bottom: 10px;
+        }
+        .btn-google:hover { background: rgba(255,255,255,0.1); transform: translateY(-2px); }
+        .btn-google img { width: 20px; height: 20px; }
+
         /* Loading Spinner */
         .btn-auth .spinner {
             display: none; width: 20px; height: 20px; border: 3px solid rgba(255,255,255,0.3);
@@ -248,6 +257,17 @@
                 <button type="submit" class="btn-auth" id="loginBtn">
                     <span class="btn-text">🔐 تسجيل الدخول</span>
                     <div class="spinner"></div>
+                </button>
+
+                <div style="text-align:center; margin:20px 0; display:flex; align-items:center; gap:10px;">
+                    <div style="flex:1; height:1px; background:var(--glass-border);"></div>
+                    <span style="font-size:12px; color:var(--text-muted);">أو</span>
+                    <div style="flex:1; height:1px; background:var(--glass-border);"></div>
+                </div>
+
+                <button type="button" class="btn-google" onclick="handleGoogleLogin()">
+                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
+                    <span>تسجيل الدخول بجوجل</span>
                 </button>
             </form>
 
@@ -418,6 +438,17 @@
                 isRegistering = false;
                 showAlert(result.error, 'error');
                 setLoading('registerBtn', false);
+            }
+        }
+
+        async function handleGoogleLogin() {
+            hideAlert();
+            const result = await AuthService.loginWithGoogle();
+            if (result.success) {
+                showAlert('تم تسجيل الدخول بنجاح!', 'success');
+                // لا نحتاج لعمل redirect يدوي لأن onAuthChanged سيتكفل بالأمر
+            } else {
+                showAlert(result.error, 'error');
             }
         }
     </script>
