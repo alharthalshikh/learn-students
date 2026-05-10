@@ -1,0 +1,3033 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>أكاديمية اجتهاد - منصتك التعليمية الأولى</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+    <script src="firebase-config.js"></script>
+    <style>
+        :root {
+            /* الوضع الليلي (الافتراضي) */
+            --bg-deep: #040d1f;
+            --bg-dark: #081830;
+            --bg-mid: #0f2550;
+            --bg-card: rgba(255, 255, 255, 0.03);
+            --bg-card-hover: rgba(255, 255, 255, 0.07);
+            --bg-input: rgba(255, 255, 255, 0.06);
+            --bg-unit-header: rgba(255, 255, 255, 0.03);
+            --bg-unit-header-hover: rgba(255, 255, 255, 0.06);
+            --bg-toast-success: rgba(0, 180, 83, 0.9);
+            --bg-toast-error: rgba(220, 23, 68, 0.9);
+            --bg-toast-info: rgba(48, 118, 255, 0.9);
+            --blue-main: #1a5cf5;
+            --blue-bright: #3b7bff;
+            --blue-glow: #5b9bff;
+            --blue-light: #a8c8ff;
+            --teal: #00d4c8;
+            --teal-dark: #00a090;
+            --gold: #f5c842;
+            --gold-light: #ffe88a;
+            --text-primary: #ffffff;
+            --text-secondary: #a8c8ff;
+            --text-muted: rgba(255, 255, 255, 0.6);
+            --glass: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.10);
+            --glass-hover: rgba(255, 255, 255, 0.10);
+            --nav-bg: rgba(6, 16, 35, 0.98);
+            --nav-border: rgba(255, 255, 255, 0.07);
+            --nav-btn-inactive: rgba(255, 255, 255, 0.4);
+            --shadow-lg: 0 0 80px rgba(0, 0, 0, 0.6);
+            --shadow-card: 0 8px 30px rgba(0, 0, 0, 0.25);
+            --app-bg: linear-gradient(170deg, rgba(10, 22, 50, 0.97) 0%, rgba(4, 13, 31, 0.99) 100%);
+            --radius-lg: 24px;
+            --radius-md: 16px;
+            --radius-sm: 12px;
+            --nav-height: 80px;
+            --center-btn-size: 56px;
+            --transition: 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        [data-theme="light"] {
+            --bg-deep: #f0f4f8;
+            --bg-dark: #ffffff;
+            --bg-mid: #e2e8f0;
+            --bg-card: rgba(0, 0, 0, 0.02);
+            --bg-card-hover: rgba(0, 0, 0, 0.04);
+            --bg-input: rgba(0, 0, 0, 0.04);
+            --bg-unit-header: rgba(0, 0, 0, 0.02);
+            --bg-unit-header-hover: rgba(0, 0, 0, 0.05);
+            --bg-toast-success: rgba(0, 180, 83, 0.9);
+            --bg-toast-error: rgba(220, 23, 68, 0.9);
+            --bg-toast-info: rgba(48, 118, 255, 0.9);
+            --blue-main: #2563eb;
+            --blue-bright: #3b82f6;
+            --blue-glow: #60a5fa;
+            --blue-light: #1e40af;
+            --teal: #0d9488;
+            --teal-dark: #0f766e;
+            --gold: #eab308;
+            --gold-light: #ca8a04;
+            --text-primary: #1a202c;
+            --text-secondary: #4a5568;
+            --text-muted: rgba(0, 0, 0, 0.55);
+            --glass: rgba(0, 0, 0, 0.03);
+            --glass-border: rgba(0, 0, 0, 0.10);
+            --glass-hover: rgba(0, 0, 0, 0.06);
+            --nav-bg: rgba(255, 255, 255, 0.97);
+            --nav-border: rgba(0, 0, 0, 0.08);
+            --nav-btn-inactive: rgba(0, 0, 0, 0.45);
+            --shadow-lg: 0 0 60px rgba(0, 0, 0, 0.12);
+            --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.08);
+            --app-bg: linear-gradient(170deg, rgba(255, 255, 255, 0.99) 0%, rgba(240, 244, 248, 0.99) 100%);
+        }
+
+        .lesson-tab-panel { display: none; }
+        .lesson-tab-panel.active { display: block; animation: fadeIn 0.3s ease; }
+        .lesson-tab-btn.active { background: var(--blue-bright) !important; color: white !important; box-shadow: 0 4px 12px rgba(59,130,246,0.3); }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        body {
+            font-family: 'Cairo', 'Tajawal', sans-serif;
+            background: var(--bg-deep);
+            min-height: 100vh;
+            min-height: 100dvh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-x: hidden;
+            overflow-y: auto;
+            position: relative;
+            padding-bottom: calc(var(--nav-height) + 30px);
+            -webkit-overflow-scrolling: touch;
+            transition: background 0.5s ease;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background: var(--bg-deep);
+            z-index: 0;
+            pointer-events: none;
+            transition: background 0.5s ease;
+        }
+
+        [data-theme="dark"] body::before {
+            background:
+                radial-gradient(ellipse 70% 50% at 25% 15%, rgba(26, 92, 245, 0.28) 0%, transparent 60%),
+                radial-gradient(ellipse 55% 45% at 75% 85%, rgba(0, 212, 200, 0.15) 0%, transparent 55%),
+                radial-gradient(ellipse 50% 40% at 50% 50%, rgba(15, 37, 80, 0.6) 0%, transparent 70%);
+            animation: bgPulse 10s infinite alternate;
+        }
+        [data-theme="light"] body::before {
+            background:
+                radial-gradient(ellipse 70% 50% at 25% 15%, rgba(37, 99, 235, 0.08) 0%, transparent 60%),
+                radial-gradient(ellipse 55% 45% at 75% 85%, rgba(13, 148, 136, 0.06) 0%, transparent 55%),
+                radial-gradient(ellipse 50% 40% at 50% 50%, rgba(226, 232, 240, 0.4) 0%, transparent 70%);
+            animation: bgPulse 10s infinite alternate;
+        }
+        @keyframes bgPulse {
+            0% {
+                opacity: 0.75;
+            }
+            100% {
+                opacity: 1;
+            }
+        }
+
+        .grid-bg {
+            position: fixed;
+            inset: 0;
+            background-image: radial-gradient(circle, rgba(91, 155, 255, 0.08) 1px, transparent 1px);
+            background-size: 40px 40px;
+            z-index: 0;
+            animation: gridDrift 40s linear infinite;
+            pointer-events: none;
+        }
+        [data-theme="light"] .grid-bg {
+            background-image: radial-gradient(circle, rgba(0, 0, 0, 0.06) 1px, transparent 1px);
+        }
+        @keyframes gridDrift {
+            0% {
+                transform: translate(0, 0);
+            }
+            100% {
+                transform: translate(40px, 40px);
+            }
+        }
+
+        .app-container {
+            position: relative;
+            z-index: 10;
+            width: 420px;
+            max-width: 100%;
+            min-height: 100vh;
+            min-height: 100dvh;
+            background: var(--app-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 0;
+            box-shadow: var(--shadow-lg), 0 0 0 1px rgba(91, 155, 255, 0.05) inset;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            transition: background 0.5s ease, box-shadow 0.5s ease;
+        }
+        @media (min-width: 421px) {
+            .app-container {
+                border-radius: 32px;
+                margin: 10px 0;
+                min-height: auto;
+            }
+        }
+
+        /* ===== SCREENS ===== */
+        .screen {
+            display: none;
+            flex-direction: column;
+            flex: 1;
+            animation: screenIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            padding: 16px;
+            padding-bottom: 20px;
+        }
+        .screen.active {
+            display: flex;
+        }
+        @keyframes screenIn {
+            from {
+                opacity: 0;
+                transform: translateY(12px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .screen-scroll {
+            flex: 1;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            padding-bottom: 10px;
+        }
+
+        /* ===== MODAL ===== */
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(10px); z-index: 10000; display: none; align-items: center; justify-content: center; padding: 20px; }
+        .modal.active { display: flex; animation: fadeIn 0.3s ease; }
+        .modal-content { background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: 24px; width: 100%; max-width: 400px; padding: 24px; position: relative; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); }
+
+        /* ===== SPLASH SCREEN ===== */
+        .splash-screen {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex: 1;
+            animation: splashIn 0.8s ease-out;
+            text-align: center;
+            padding: 30px;
+        }
+        .splash-screen.active {
+            display: flex;
+        }
+        @keyframes splashIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        .splash-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+        }
+        .splash-icon {
+            width: 90px;
+            height: 90px;
+            background: linear-gradient(135deg, var(--blue-main), var(--teal));
+            border-radius: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            box-shadow: 0 20px 50px rgba(26, 92, 245, 0.45);
+            animation: float 3s ease-in-out infinite;
+        }
+        @keyframes float {
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-12px);
+            }
+        }
+        .splash-title {
+            font-size: 26px;
+            font-weight: 900;
+            color: var(--text-primary);
+            letter-spacing: -0.5px;
+            line-height: 1.4;
+        }
+        .splash-title .highlight {
+            background: linear-gradient(135deg, var(--blue-bright), var(--teal));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .splash-subtitle {
+            font-size: 14px;
+            color: var(--blue-light);
+            opacity: 0.8;
+        }
+        .splash-loader {
+            width: 50px;
+            height: 4px;
+            background: rgba(128, 128, 128, 0.15);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 8px;
+        }
+        .splash-loader-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--blue-main), var(--teal));
+            border-radius: 10px;
+            animation: loading 1.8s ease-in-out infinite;
+            width: 30%;
+        }
+        @keyframes loading {
+            0% {
+                transform: translateX(-100%);
+            }
+            100% {
+                transform: translateX(400%);
+            }
+        }
+
+        /* ===== LOGIN SCREEN ===== */
+        .login-card {
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            padding: 28px 22px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            box-shadow: var(--shadow-card);
+        }
+        .login-title {
+            font-size: 20px;
+            font-weight: 800;
+            color: var(--text-primary);
+            text-align: center;
+            margin-bottom: 4px;
+        }
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .input-group label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--blue-light);
+            opacity: 0.85;
+        }
+        .input-field {
+            width: 100%;
+            padding: 14px 16px;
+            border-radius: var(--radius-sm);
+            background: var(--bg-input);
+            border: 1.5px solid var(--glass-border);
+            color: var(--text-primary);
+            font-family: 'Cairo', sans-serif;
+            font-size: 15px;
+            transition: var(--transition);
+            outline: none;
+        }
+        .input-field:focus {
+            border-color: var(--blue-glow);
+            background: var(--bg-card-hover);
+            box-shadow: 0 0 20px rgba(26, 92, 245, 0.15);
+        }
+        .input-field::placeholder {
+            color: var(--text-muted);
+        }
+        .select-field {
+            appearance: none;
+            -webkit-appearance: none;
+            cursor: pointer;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%235b9bff' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'%3E%3C/path%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: left 14px center;
+            padding-left: 40px;
+        }
+        .select-field option {
+            background: var(--bg-dark);
+            color: var(--text-primary);
+        }
+        .locked-option {
+            color: var(--text-muted) !important;
+            font-style: italic;
+        }
+        .btn-primary {
+            width: 100%;
+            padding: 15px;
+            border-radius: var(--radius-sm);
+            background: linear-gradient(135deg, var(--blue-main), #1248c8);
+            color: #fff;
+            font-family: 'Cairo', sans-serif;
+            font-size: 16px;
+            font-weight: 700;
+            border: none;
+            cursor: pointer;
+            transition: var(--transition);
+            box-shadow: 0 8px 25px rgba(26, 92, 245, 0.35);
+            letter-spacing: 0.3px;
+        }
+        .btn-primary:hover {
+            box-shadow: 0 12px 35px rgba(26, 92, 245, 0.5);
+            transform: translateY(-2px);
+        }
+        .btn-primary:active {
+            transform: scale(0.96);
+        }
+
+        /* ===== HEADER ===== */
+        .screen-header {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            gap: 12px;
+            padding: 8px 0 16px;
+            border-bottom: 1px solid var(--glass-border);
+            margin-bottom: 16px;
+        }
+        .header-greeting {
+            flex: 1;
+        }
+        .header-greeting .greeting-main {
+            font-size: 18px;
+            font-weight: 800;
+            color: var(--text-primary);
+        }
+        .header-greeting .greeting-sub {
+            font-size: 12px;
+            color: var(--blue-light);
+            opacity: 0.7;
+        }
+        .header-avatar-sm {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--blue-main), var(--bg-mid));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            border: 2px solid rgba(91, 155, 255, 0.3);
+        }
+
+        /* ===== THEME TOGGLE & DEV BADGE ===== */
+        .theme-toggle-btn {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            cursor: pointer;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+            flex-shrink: 0;
+            color: var(--text-primary);
+        }
+        .theme-toggle-btn:hover {
+            background: var(--bg-card-hover);
+            transform: rotate(20deg);
+        }
+        .dev-badge {
+            display: inline-block;
+            background: #eab308;
+            color: #000;
+            font-size: 9px;
+            font-weight: 800;
+            padding: 3px 8px;
+            border-radius: 10px;
+            margin-right: 6px;
+            letter-spacing: 0.5px;
+            animation: pulse-badge 2s infinite;
+        }
+        @keyframes pulse-badge {
+            0%,
+            100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        /* ===== STUDENT INFO CARD ===== */
+        .student-card {
+            background: linear-gradient(145deg, rgba(26, 92, 245, 0.14) 0%, rgba(0, 212, 200, 0.07) 100%);
+            border: 1.5px solid rgba(91, 155, 255, 0.22);
+            border-radius: var(--radius-lg);
+            padding: 20px 18px;
+            margin-bottom: 20px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: var(--shadow-card);
+        }
+        [data-theme="light"] .student-card {
+            background: linear-gradient(145deg, rgba(37, 99, 235, 0.08) 0%, rgba(13, 148, 136, 0.04) 100%);
+            border: 1.5px solid rgba(96, 165, 250, 0.3);
+        }
+        .student-card::before {
+            content: 'طالب';
+            position: absolute;
+            top: 12px;
+            left: 16px;
+            font-size: 10px;
+            font-weight: 700;
+            color: var(--teal);
+            background: rgba(0, 212, 200, 0.12);
+            padding: 4px 10px;
+            border-radius: 20px;
+            letter-spacing: 0.5px;
+        }
+        .student-card-top {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 14px;
+        }
+        .student-card-avatar {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--blue-main), var(--bg-mid));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            border: 3px solid rgba(91, 155, 255, 0.4);
+            flex-shrink: 0;
+        }
+        .student-card-info {
+            flex: 1;
+        }
+        .student-card-name {
+            font-size: 16px;
+            font-weight: 800;
+            color: var(--text-primary);
+        }
+        .student-card-level {
+            font-size: 11px;
+            color: var(--gold-light);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .student-card-level .dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: var(--gold);
+            animation: pulse 2s infinite;
+            display: inline-block;
+        }
+        @keyframes pulse {
+            0%,
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 0.4;
+                transform: scale(0.7);
+            }
+        }
+        .student-card-stats {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .mini-stat {
+            flex: 1;
+            min-width: 60px;
+            background: var(--bg-card);
+            border-radius: var(--radius-sm);
+            padding: 10px 8px;
+            text-align: center;
+            border: 1px solid var(--glass-border);
+        }
+        .mini-stat-val {
+            font-size: 16px;
+            font-weight: 800;
+            color: var(--text-primary);
+        }
+        .mini-stat-lbl {
+            font-size: 10px;
+            color: var(--blue-light);
+            opacity: 0.6;
+            margin-top: 2px;
+        }
+        .eye-toggle {
+            position: absolute;
+            bottom: 14px;
+            left: 14px;
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            transition: var(--transition);
+            color: var(--text-primary);
+        }
+        .eye-toggle:hover {
+            background: var(--bg-card-hover);
+        }
+        .student-card-stats.hidden-stats .mini-stat-val {
+            filter: blur(6px);
+            transition: 0.3s;
+        }
+
+        /* ===== SUBJECTS GRID HOME ===== */
+        .subjects-grid-home {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+        .subject-card-home {
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            padding: 18px 14px;
+            cursor: pointer;
+            transition: var(--transition);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .subject-card-home:hover {
+            background: var(--bg-card-hover);
+            transform: translateY(-3px);
+            border-color: rgba(91, 155, 255, 0.3);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        }
+        .subject-card-home:active {
+            transform: scale(0.95);
+        }
+        .subject-card-home .subj-icon {
+            font-size: 36px;
+            margin-bottom: 8px;
+        }
+        .subject-card-home .subj-name {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+        .subject-card-home .subj-progress-mini {
+            width: 100%;
+            height: 4px;
+            background: rgba(128, 128, 128, 0.15);
+            border-radius: 4px;
+            margin-top: 10px;
+            overflow: hidden;
+        }
+        .subject-card-home .subj-progress-fill-mini {
+            height: 100%;
+            background: linear-gradient(90deg, var(--blue-bright), var(--teal));
+            border-radius: 4px;
+            transition: width 0.6s;
+        }
+
+        /* ===== PLATFORM SERVICES ===== */
+        .service-card {
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            padding: 18px;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 10px;
+        }
+        .service-card:hover {
+            background: var(--bg-card-hover);
+            border-color: rgba(91, 155, 255, 0.25);
+            transform: translateX(-3px);
+        }
+        .service-card:active {
+            transform: scale(0.97);
+        }
+        .service-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: var(--radius-sm);
+            background: linear-gradient(135deg, rgba(26, 92, 245, 0.2), rgba(0, 212, 200, 0.1));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 26px;
+            flex-shrink: 0;
+            border: 1px solid rgba(91, 155, 255, 0.2);
+        }
+        .service-info {
+            flex: 1;
+        }
+        .service-name {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+        .service-desc {
+            font-size: 11px;
+            color: var(--blue-light);
+            opacity: 0.6;
+            margin-top: 2px;
+        }
+        .service-arrow {
+            color: var(--blue-glow);
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        /* ===== SUMMARY PAGE ===== */
+        .summary-subject-card {
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            padding: 16px;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 10px;
+        }
+        .summary-subject-card:hover {
+            background: var(--bg-card-hover);
+            border-color: rgba(91, 155, 255, 0.2);
+        }
+        .summary-subject-card:active {
+            transform: scale(0.97);
+        }
+        .summary-content {
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            padding: 18px;
+            color: var(--text-primary);
+            font-size: 14px;
+            line-height: 2;
+            white-space: pre-line;
+        }
+
+        /* ===== PROFILE PAGE ===== */
+        .profile-avatar-lg {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--blue-main), var(--bg-mid));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 50px;
+            margin: 0 auto 16px;
+            border: 4px solid rgba(91, 155, 255, 0.4);
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.3);
+        }
+        .qr-code-box {
+            width: 90px;
+            height: 90px;
+            background: #fff;
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 60px;
+            flex-shrink: 0;
+            color: #000;
+        }
+        .profile-info-row {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            padding: 14px 16px;
+            margin-bottom: 10px;
+        }
+        .profile-info-row .info-icon {
+            font-size: 22px;
+            flex-shrink: 0;
+        }
+        .profile-info-row .info-label {
+            font-size: 11px;
+            color: var(--blue-light);
+            opacity: 0.6;
+        }
+        .profile-info-row .info-value {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        /* ===== UNITS & LESSONS ===== */
+        .unit-accordion {
+            margin-bottom: 8px;
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            border: 1px solid var(--glass-border);
+            background: var(--bg-card);
+        }
+        .unit-header {
+            padding: 14px 16px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 700;
+            color: var(--text-primary);
+            font-size: 14px;
+            background: var(--bg-unit-header);
+            transition: var(--transition);
+        }
+        .unit-header:hover {
+            background: var(--bg-unit-header-hover);
+        }
+        .unit-header .arrow {
+            transition: transform 0.3s;
+            font-size: 12px;
+            color: var(--blue-glow);
+        }
+        .unit-header.open .arrow {
+            transform: rotate(180deg);
+        }
+        .unit-body {
+            display: none;
+            padding: 8px 12px 14px;
+        }
+        .unit-body.open {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                max-height: 0;
+            }
+            to {
+                opacity: 1;
+                max-height: 500px;
+            }
+        }
+        .lesson-circle-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 8px;
+            cursor: pointer;
+            border-radius: var(--radius-sm);
+            transition: var(--transition);
+            margin-bottom: 4px;
+        }
+        .lesson-circle-row:hover {
+            background: var(--bg-card-hover);
+        }
+        .lesson-circle {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--blue-main), #1248c8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 15px;
+            color: #fff;
+            flex-shrink: 0;
+            box-shadow: 0 4px 15px rgba(26, 92, 245, 0.3);
+            border: 2px solid rgba(91, 155, 255, 0.3);
+        }
+        .lesson-circle.done {
+            background: linear-gradient(135deg, var(--teal), var(--teal-dark));
+            border-color: rgba(0, 212, 200, 0.4);
+            box-shadow: 0 4px 15px rgba(0, 212, 200, 0.3);
+        }
+        .lesson-circle-row .lesson-num {
+            font-size: 12px;
+            color: var(--blue-light);
+            opacity: 0.7;
+            flex-shrink: 0;
+            font-weight: 600;
+            min-width: 30px;
+        }
+        .lesson-circle-row .lesson-title-text {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text-primary);
+            flex: 1;
+        }
+        .lesson-circle-row .lesson-check {
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+        .quiz-btn-mini {
+            display: inline-block;
+            margin-top: 6px;
+            padding: 8px 16px;
+            background: linear-gradient(135deg, rgba(245, 200, 66, 0.2), rgba(245, 200, 66, 0.06));
+            border: 1px solid rgba(245, 200, 66, 0.35);
+            border-radius: 20px;
+            color: var(--gold-light);
+            font-weight: 700;
+            font-size: 12px;
+            cursor: pointer;
+            transition: var(--transition);
+            text-align: center;
+        }
+        .quiz-btn-mini:hover {
+            background: rgba(245, 200, 66, 0.2);
+        }
+
+        /* ===== LESSON VIEW TABS ===== */
+        .lesson-tabs-nav {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 14px;
+            background: var(--bg-card);
+            border-radius: var(--radius-sm);
+            padding: 5px;
+            border: 1px solid var(--glass-border);
+            flex-wrap: wrap;
+        }
+        .lesson-tab-btn {
+            flex: 1;
+            min-width: 70px;
+            padding: 10px 12px;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            font-family: 'Cairo', sans-serif;
+            font-size: 13px;
+            font-weight: 700;
+            background: transparent;
+            color: var(--text-secondary);
+            transition: var(--transition);
+            white-space: nowrap;
+            text-align: center;
+        }
+        .lesson-tab-btn.active {
+            background: linear-gradient(135deg, var(--blue-main), #1248c8);
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(26, 92, 245, 0.3);
+        }
+        .lesson-tab-btn:hover:not(.active) {
+            background: var(--bg-card-hover);
+            color: var(--text-primary);
+        }
+        .lesson-tab-panel {
+            display: none;
+            animation: tabFadeIn 0.3s ease;
+        }
+        .lesson-tab-panel.active {
+            display: block;
+        }
+        @keyframes tabFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(6px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ===== LESSON CONTENT ===== */
+        .lesson-full-content {
+            padding: 8px 0;
+        }
+        .lesson-text-block {
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            padding: 18px;
+            color: var(--text-primary);
+            font-size: 14px;
+            line-height: 2;
+            white-space: pre-line;
+            margin-bottom: 14px;
+        }
+        .video-wrapper {
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            margin-bottom: 14px;
+            background: #000;
+            aspect-ratio: 16/9;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
+        }
+        .video-wrapper iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        .summary-box {
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            padding: 18px;
+            color: var(--text-primary);
+            font-size: 14px;
+            line-height: 2;
+            white-space: pre-line;
+            margin-bottom: 14px;
+        }
+        .quiz-question {
+            margin-bottom: 18px;
+        }
+        .quiz-question p {
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+            font-size: 14px;
+        }
+        .quiz-option {
+            display: block;
+            margin: 5px 0;
+            padding: 12px 14px;
+            background: var(--bg-card);
+            border-radius: 10px;
+            border: 1px solid var(--glass-border);
+            cursor: pointer;
+            transition: var(--transition);
+            color: var(--text-primary);
+            font-size: 13px;
+        }
+        .quiz-option:hover {
+            background: var(--bg-card-hover);
+            border-color: rgba(91, 155, 255, 0.4);
+        }
+        .quiz-option.selected {
+            background: linear-gradient(135deg, rgba(26, 92, 245, 0.3), rgba(26, 92, 245, 0.12));
+            border-color: var(--blue-glow);
+            color: var(--text-primary);
+        }
+        .quiz-option.correct {
+            background: linear-gradient(135deg, rgba(0, 180, 140, 0.35), rgba(0, 212, 200, 0.18));
+            border-color: var(--teal);
+        }
+        .quiz-option.wrong {
+            background: linear-gradient(135deg, rgba(220, 50, 50, 0.35), rgba(180, 30, 30, 0.18));
+            border-color: #e74c3c;
+        }
+        .quiz-result {
+            text-align: center;
+            font-size: 17px;
+            font-weight: 800;
+            color: var(--teal);
+            margin-top: 16px;
+            padding: 14px;
+            background: rgba(0, 212, 200, 0.08);
+            border-radius: var(--radius-sm);
+            border: 1px solid rgba(0, 212, 200, 0.2);
+        }
+        .btn-sm {
+            padding: 11px 20px;
+            border-radius: 20px;
+            background: linear-gradient(135deg, var(--blue-main), #1248c8);
+            color: #fff;
+            font-family: 'Cairo', sans-serif;
+            font-size: 13px;
+            font-weight: 700;
+            border: none;
+            cursor: pointer;
+            transition: var(--transition);
+            box-shadow: 0 4px 15px rgba(26, 92, 245, 0.3);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .btn-sm:hover {
+            box-shadow: 0 6px 20px rgba(26, 92, 245, 0.45);
+        }
+        .btn-sm:active {
+            transform: scale(0.95);
+        }
+        .btn-sm:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        /* ===== ACHIEVEMENTS SCREEN ===== */
+        .achievement-card {
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            padding: 18px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 10px;
+            transition: var(--transition);
+        }
+        .achievement-icon {
+            font-size: 40px;
+            flex-shrink: 0;
+        }
+        .achievement-info .ach-title {
+            font-weight: 700;
+            color: var(--text-primary);
+            font-size: 14px;
+        }
+        .achievement-info .ach-desc {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        /* ===== BOTTOM NAVIGATION ===== */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 420px;
+            max-width: 100%;
+            height: var(--nav-height);
+            background: var(--nav-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-top: 1px solid var(--nav-border);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 1000;
+            padding: 0 8px;
+            border-radius: 0;
+            transition: background 0.5s ease;
+        }
+        @media (min-width: 421px) {
+            .bottom-nav {
+                border-radius: 0 0 32px 32px;
+            }
+        }
+        .nav-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            color: var(--nav-btn-inactive);
+            font-size: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            padding: 8px 10px;
+            border-radius: 14px;
+            background: transparent;
+            border: none;
+            font-family: 'Cairo', sans-serif;
+            position: relative;
+            z-index: 1;
+            min-width: 55px;
+        }
+        .nav-btn.active {
+            color: var(--teal);
+            background: rgba(0, 212, 200, 0.08);
+        }
+        .nav-btn .nav-icon {
+            font-size: 22px;
+            transition: var(--transition);
+        }
+        .nav-btn.active .nav-icon {
+            filter: drop-shadow(0 0 8px rgba(0, 212, 200, 0.5));
+        }
+        .nav-center-wrapper {
+            position: relative;
+            z-index: 2;
+            margin-top: -28px;
+        }
+        .nav-center-btn {
+            width: var(--center-btn-size);
+            height: var(--center-btn-size);
+            border-radius: 50%;
+            background: linear-gradient(135deg, #f59e0b, #eab308);
+            border: 3px solid rgba(255, 255, 255, 0.35);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 8px 30px rgba(245, 158, 11, 0.45);
+            transition: var(--transition);
+            font-size: 24px;
+            color: #fff;
+        }
+        .nav-center-btn:hover {
+            box-shadow: 0 12px 40px rgba(245, 158, 11, 0.6);
+            transform: scale(1.06);
+        }
+        .nav-center-btn:active {
+            transform: scale(0.9);
+        }
+
+        /* ===== TOAST ===== */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            width: 90%;
+            max-width: 360px;
+        }
+        .toast {
+            padding: 12px 18px;
+            border-radius: 12px;
+            color: #fff;
+            font-weight: 600;
+            text-align: center;
+            backdrop-filter: blur(16px);
+            animation: slideDown 0.4s ease;
+            font-size: 13px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+        .toast.success {
+            background: var(--bg-toast-success);
+            border: 1px solid rgba(0, 220, 100, 0.3);
+        }
+        .toast.error {
+            background: var(--bg-toast-error);
+            border: 1px solid rgba(255, 80, 100, 0.3);
+        }
+        .toast.info {
+            background: var(--bg-toast-info);
+            border: 1px solid rgba(91, 155, 255, 0.3);
+        }
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px) scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+        .fade-out {
+            animation: fadeOut 0.3s ease forwards;
+        }
+        @keyframes fadeOut {
+            to {
+                opacity: 0;
+                transform: translateY(-15px) scale(0.9);
+            }
+        }
+
+        /* ===== BACK BUTTON ===== */
+        .back-btn-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 14px;
+            cursor: pointer;
+            color: var(--blue-glow);
+            font-weight: 700;
+            font-size: 13px;
+            padding: 6px 0;
+            transition: var(--transition);
+        }
+        .back-btn-row:hover {
+            color: var(--teal);
+        }
+        .back-btn-row .back-arrow {
+            font-size: 18px;
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 420px) {
+            .app-container {
+                width: 100%;
+                border-radius: 0;
+                border: none;
+                box-shadow: none;
+            }
+            .bottom-nav {
+                width: 100%;
+                border-radius: 0;
+            }
+            .subjects-grid-home {
+                grid-template-columns: 1fr 1fr;
+                gap: 8px;
+            }
+            .subject-card-home {
+                padding: 14px 10px;
+            }
+            .student-card {
+                padding: 16px 14px;
+            }
+            .lesson-tabs-nav {
+                gap: 3px;
+                padding: 4px;
+            }
+            .lesson-tab-btn {
+                font-size: 11px;
+                padding: 8px 8px;
+            }
+        }
+
+        /* ===== SCROLLBAR ===== */
+        ::-webkit-scrollbar {
+            width: 3px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(91, 155, 255, 0.2);
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="grid-bg"></div>
+    <div class="toast-container" id="toastContainer"></div>
+
+    <div class="app-container" id="appContainer"></div>
+
+    <nav class="bottom-nav" id="bottomNav">
+        <button class="nav-btn active" data-tab="home" onclick="switchTab('home')">
+            <span class="nav-icon">🏠</span>
+            <span>الرئيسية</span>
+        </button>
+        <button class="nav-btn" data-tab="platform" onclick="switchTab('platform')">
+            <span class="nav-icon">🖥️</span>
+            <span>المنصة</span>
+        </button>
+        <div class="nav-center-wrapper">
+            <button class="nav-center-btn" onclick="switchTab('achievements')" title="الإنجازات والتحديات">
+                <span>🏆</span>
+            </button>
+        </div>
+        <button class="nav-btn" data-tab="summary" onclick="switchTab('summary')">
+            <span class="nav-icon">📋</span>
+            <span>الملخص</span>
+        </button>
+        <button class="nav-btn" data-tab="profile" onclick="switchTab('profile')">
+            <span class="nav-icon">👤</span>
+            <span>حسابي</span>
+        </button>
+    </nav>
+
+    <script>
+        // ==================== وضع التطوير ====================
+        const DEV_MODE = true;
+
+        // ==================== AUDIO SYSTEM ====================
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        let audioCtx;
+
+        function initAudio() {
+            if (!audioCtx) audioCtx = new AudioCtx();
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+        }
+
+        function playTone(freq, type, duration, vol = 0.06) {
+            if (!audioCtx) return;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = type;
+            osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+            gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + duration);
+        }
+
+        function playClick() { playTone(700, 'sine', 0.08, 0.04); }
+
+        function playCorrect() { playTone(523, 'sine', 0.12, 0.06);
+            setTimeout(() => playTone(659, 'sine', 0.12, 0.06), 80);
+            setTimeout(() => playTone(784, 'sine', 0.16, 0.06), 160); }
+
+        function playWrong() { playTone(180, 'triangle', 0.18, 0.05); }
+        document.addEventListener('click', initAudio, { once: true });
+        document.addEventListener('touchstart', initAudio, { once: true });
+
+        // ==================== THEME ====================
+        function getTheme() {
+            return localStorage.getItem('ijtihad_theme') || 'dark';
+        }
+
+        function setTheme(theme) {
+            localStorage.setItem('ijtihad_theme', theme);
+            document.documentElement.setAttribute('data-theme', theme);
+        }
+
+        function toggleTheme() {
+            const current = getTheme();
+            const next = current === 'dark' ? 'light' : 'dark';
+            setTheme(next);
+            playClick();
+            showToast(next === 'light' ? '☀️ تم التبديل إلى الوضع النهاري' : '🌙 تم التبديل إلى الوضع الليلي', 'info');
+        }
+
+        // تطبيق الثيم عند التحميل
+        setTheme(getTheme());
+
+        // ==================== TOAST ====================
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.textContent = message;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.classList.add('fade-out');
+                setTimeout(() => toast.remove(), 300);
+            }, 2500);
+        }
+
+        // ==================== APP STATE & AUTH ====================
+        let userData = {
+            name: '',
+            role: 'student',
+            gradeId: '',
+            avatar: '🧑‍🎓',
+            xp: 0,
+            level: 1,
+            streak: 0,
+            completedLessons: [],
+            lastActive: ''
+        };
+
+        AuthService.onAuthChanged(async (user) => {
+            if (!user) {
+                window.location.href = 'login.html';
+                return;
+            }
+            const cloudData = await AuthService.getUserData(user.uid);
+            if (cloudData) {
+                userData = cloudData;
+                authHandled = true; 
+
+                // تثبيت رتبة الأدمن لهذا الحساب محلياً لتجاوز خطأ التصاريح
+                if (user.email === 'alharth465117@gmail.com') {
+                    userData.role = 'admin';
+                }
+                if (userData.role === 'student' && !userData.studentId) {
+                    const sid = `IJT-${String(userData.phone || '0000').slice(-4)}-${Math.random().toString(36).slice(-4).toUpperCase()}`;
+                    userData.studentId = sid;
+                    await AuthService.updateUserData(user.uid, { studentId: sid });
+                }
+
+                // توجيه حسب الرتبة
+                if (userData.role === 'parent') {
+                    showParentDashboard();
+                } else if (userData.role === 'admin') {
+                    const adminBtn = document.createElement('div');
+                    adminBtn.innerHTML = `
+                        <button onclick="location.href='admin.html'" style="position:fixed; bottom:100px; left:20px; z-index:1000; background:var(--blue-main); color:white; border:none; padding:12px 20px; border-radius:30px; font-weight:bold; box-shadow:0 10px 20px rgba(0,0,0,0.3); display:flex; align-items:center; gap:8px; cursor:pointer;">
+                            ⚙️ لوحة التحكم
+                        </button>
+                    `;
+                    document.body.appendChild(adminBtn);
+                    await restoreNavigationState();
+                } else {
+                    await restoreNavigationState();
+                }
+            }
+        });
+
+        async function syncWithCloud() {
+            const user = AuthService.getCurrentUser();
+            if (user) {
+                await AuthService.updateUserData(user.uid, userData);
+            }
+        }
+
+        async function updateStreak() {
+            const today = new Date().toDateString();
+            if (userData.lastActive === today) return;
+            const yesterday = new Date(Date.now() - 86400000).toDateString();
+            userData.streak = (userData.lastActive === yesterday) ? userData.streak + 1 : 1;
+            userData.lastActive = today;
+            await syncWithCloud();
+        }
+
+        async function addXP(points) {
+            userData.xp += points;
+            const newLevel = Math.floor(userData.xp / 100) + 1;
+            if (newLevel > userData.level) {
+                userData.level = newLevel;
+                showToast(`🎉 لقد وصلت للمستوى ${newLevel}!`, 'success');
+            }
+            await syncWithCloud();
+        }
+
+        // ==================== DATABASE SERVICE (Firebase Connected) ====================
+        const DB = {
+            async getSubjects() {
+                return await FireDB.getSubjects();
+            },
+            async findLessonById(lessonId) {
+                return await FireDB.findLessonById(lessonId);
+            }
+        };
+
+        async function getSubjectsData() {
+            return await DB.getSubjects();
+        }
+
+        async function getAllLessonsFromSubjects(subjects) {
+            let lessons = [];
+            if (!subjects) return lessons;
+            for (let subjId in subjects) {
+                if (subjects[subjId].units) {
+                    subjects[subjId].units.forEach(unit => {
+                        if (unit.lessons) {
+                            unit.lessons.forEach(lesson => lessons.push(lesson));
+                        }
+                    });
+                }
+            }
+            return lessons;
+        }
+
+        async function getTotalLessonsCount() {
+            const subjects = await getSubjectsData();
+            const all = await getAllLessonsFromSubjects(subjects);
+            return all.length;
+        }
+
+        async function getCompletedCount() {
+            const subjects = await getSubjectsData();
+            const all = await getAllLessonsFromSubjects(subjects);
+            const allIds = all.map(l => l.id);
+            return userData.completedLessons.filter(id => allIds.includes(id)).length;
+        }
+
+        function getSubjectProgress(subj) {
+            let total = 0, completed = 0;
+            if (subj.units) {
+                subj.units.forEach(unit => {
+                    if (unit.lessons) {
+                        unit.lessons.forEach(lesson => {
+                            total++;
+                            if (userData.completedLessons.includes(lesson.id)) completed++;
+                        });
+                    }
+                });
+            }
+            const percent = total ? Math.round((completed / total) * 100) : 0;
+            return { completed, total, percent };
+        }
+
+        async function getOverallProgress() {
+            const total = await getTotalLessonsCount();
+            const completed = await getCompletedCount();
+            const percent = total ? Math.round((completed / total) * 100) : 0;
+            return { completed, total, percent };
+        }
+
+        function logout() {
+            AuthService.logout().then(() => {
+                window.location.href = 'login.html';
+            });
+        }
+
+        // ==================== APP CONTAINER ====================
+        const appContainer = document.getElementById('appContainer');
+        let currentScreen = 'splash';
+        let currentSubjectId = null;
+        let navigationStack = [];
+
+        // دالة لحفظ حالة التنقل
+        function saveNavigationState(state) {
+            localStorage.setItem('lastNavState', JSON.stringify(state));
+        }
+
+        // دالة لاستعادة حالة التنقل
+        async function restoreNavigationState() {
+            const saved = localStorage.getItem('lastNavState');
+            if (saved) {
+                try {
+                    const state = JSON.parse(saved);
+                    if (state.tab) {
+                        await switchTab(state.tab);
+                        return;
+                    }
+                    if (state.screen === 'subject' && state.subjId) {
+                        await openSubject(state.subjId);
+                        return;
+                    }
+                    if (state.screen === 'lesson' && state.subjId) {
+                        await openLessonView(state.subjId, state.unitIdx, state.lessonId);
+                        return;
+                    }
+                } catch (e) { console.error("Error restoring nav state:", e); }
+            }
+            // إذا لم يوجد شيء محفوظ، افتح الرئيسية
+            await showHomeScreen();
+        }
+
+        function renderScreen(html) {
+            appContainer.innerHTML = html;
+        }
+
+        let authHandled = false; // علم لمنع Splash من الانتقال بعد استعادة الحالة
+
+        // ==================== SPLASH SCREEN ====================
+        function showSplash() {
+            currentScreen = 'splash';
+            renderScreen(`
+            <div class="splash-screen active" id="splashScreen">
+              <div class="splash-content">
+                <div class="splash-icon">🎓</div>
+                <div class="splash-title">أهلاً في <span class="highlight">منصتك التعليمية الأولى</span></div>
+                <div class="splash-subtitle">أكاديمية اجتهاد - طريقك إلى التفوق</div>
+                <div class="splash-loader"><div class="splash-loader-bar"></div></div>
+              </div>
+            </div>
+          `);
+            setTimeout(() => {
+                // فقط ننتقل للرئيسية إذا لم يتم التعامل مع المصادقة بعد
+                if (!authHandled) {
+                    switchTab('home');
+                }
+            }, 2200);
+        }
+
+        // ==================== LOGIN SCREEN ====================
+        function showLogin() {
+            window.location.href = 'login.html';
+        }
+
+        // ==================== TAB SWITCHING ====================
+        async function switchTab(tab, pushState = true) {
+            updateStreak();
+            saveNavigationState({ tab: tab });
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            const activeBtn = document.querySelector(`.nav-btn[data-tab="${tab}"]`);
+            if (activeBtn) activeBtn.classList.add('active');
+
+            navigationStack = [];
+            currentSubjectId = null;
+
+            if (pushState) {
+                history.pushState({ type: 'tab', tab: tab }, '', '');
+            }
+
+            switch (tab) {
+                case 'home': await showHomeScreen(); break;
+                case 'platform': await showPlatformScreen(); break;
+                case 'summary': await showSummaryScreen(); break;
+                case 'profile': await showProfileScreen(); break;
+                case 'achievements': await showAchievementsScreen(); break;
+                default: await showHomeScreen();
+            }
+            currentScreen = tab;
+        }
+
+        function scrollToTop() {
+            const scrollable = document.querySelector('.screen-scroll');
+            if (scrollable) {
+                scrollable.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // ==================== HOME SCREEN ====================
+        async function showHomeScreen() {
+            currentScreen = 'home';
+            const subjects = await getSubjectsData();
+            const progress = await getOverallProgress();
+            const hiddenClass = userData.statsHidden ? 'hidden-stats' : '';
+            const gradeLabel = userData.gradeId === 'g9' ? 'التاسع أساسي' : 'الثالث ثانوي';
+
+            let subjectsHTML = '';
+            if (subjects) {
+                for (let subjId in subjects) {
+                    const subj = subjects[subjId];
+                    const prog = getSubjectProgress(subj);
+                    subjectsHTML += `
+                <div class="subject-card-home" onclick="openSubject('${subjId}')">
+                  <div class="subj-icon">
+                    ${subj.icon && subj.icon.startsWith('data:image/') 
+                        ? `<img src="${subj.icon}" style="width:100%; height:100%; border-radius:12px; object-fit:cover;">` 
+                        : subj.icon}
+                  </div>
+                  <div class="subj-name">${subj.name}</div>
+                  <div class="subj-progress-mini">
+                    <div class="subj-progress-fill-mini" style="width:${prog.percent}%"></div>
+                  </div>
+                </div>`;
+                }
+            }
+            if (subjectsHTML === '') {
+                subjectsHTML = '<div style="grid-column: 1 / -1; text-align: center; padding: 20px; color: var(--text-muted); font-size: 13px;">لا توجد مواد مضافة حالياً. استخدم لوحة التحكم لإضافة مواد.</div>';
+            }
+
+            const devBadgeHTML = '';
+            const themeIcon = getTheme() === 'dark' ? '☀️' : '🌙';
+            const themeLabel = getTheme() === 'dark' ? 'نهاري' : 'ليلي';
+
+            renderScreen(`
+            <div class="screen active" id="homeScreen">
+              <div class="screen-scroll">
+                <div class="screen-header">
+                  <div class="header-avatar-sm">${userData.avatar}</div>
+                  <div class="header-greeting">
+                    <div class="greeting-main">أهلاً بك، ${userData.name.split(' ')[0]} 👋</div>
+                    <div class="greeting-sub">طالب مجتهد في ${gradeLabel}</div>
+                  </div>
+                  <button class="theme-toggle-btn" onclick="toggleTheme()" title="تغيير الوضع إلى ${themeLabel}">${themeIcon}</button>
+                </div>
+                <div class="student-card">
+                  <div class="student-card-top">
+                    <div class="student-card-avatar">${userData.avatar}</div>
+                    <div class="student-card-info">
+                      <div class="student-card-name">${userData.name}</div>
+                      <div class="student-card-level"><span class="dot"></span> المستوى ${userData.level}</div>
+                    </div>
+                  </div>
+                  <div class="student-card-stats ${hiddenClass}" id="statsContainer">
+                    <div class="mini-stat">
+                      <div class="mini-stat-val">${progress.percent}%</div>
+                      <div class="mini-stat-lbl">نسبة التقدم</div>
+                    </div>
+                    <div class="mini-stat">
+                      <div class="mini-stat-val">${userData.streak} 🔥</div>
+                      <div class="mini-stat-lbl">أيام التعلم</div>
+                    </div>
+                    <div class="mini-stat">
+                      <div class="mini-stat-val">${userData.xp} ⚡</div>
+                      <div class="mini-stat-lbl">نقاط الخبرة</div>
+                    </div>
+                  </div>
+                  <button class="eye-toggle" onclick="toggleStatsVisibility()" title="إظهار/إخفاء التقدم">👁️</button>
+                </div>
+                <div style="font-size:13px; font-weight:700; color:var(--blue-light); margin-bottom:12px; opacity:0.75;">📚 المواد الدراسية</div>
+                <div class="subjects-grid-home">
+                  ${subjectsHTML}
+                </div>
+              </div>
+            </div>
+          `);
+        }
+
+        function toggleStatsVisibility() {
+            userData.statsHidden = !userData.statsHidden;
+            saveData();
+            const container = document.getElementById('statsContainer');
+            if (container) {
+                container.classList.toggle('hidden-stats', userData.statsHidden);
+            }
+            playClick();
+        }
+
+        // ==================== OPEN SUBJECT (Units & Lessons) ====================
+        async function openSubject(subjId) {
+            const subjects = await getSubjectsData();
+            if (!subjects || !subjects[subjId]) return;
+            const subj = subjects[subjId];
+            const prog = getSubjectProgress(subj);
+            currentSubjectId = subjId;
+            navigationStack.push({ screen: 'subject', subjId });
+            saveNavigationState({ screen: 'subject', subjId: subjId });
+            
+            history.pushState({ type: 'subject', subjId: subjId }, '', '');
+
+            let unitsHTML = '';
+            subj.units.forEach((unit, uIdx) => {
+                let lessonsHTML = '';
+                unit.lessons.forEach((lesson, lIdx) => {
+                    const done = userData.completedLessons.includes(lesson.id);
+                    const globalNum = lIdx + 1;
+                    lessonsHTML += `
+                <div class="lesson-circle-row" onclick="openLessonView('${subjId}', ${uIdx}, ${lIdx})">
+                  <div class="lesson-circle ${done ? 'done' : ''}">${globalNum}</div>
+                  <div style="flex:1; display:flex; flex-direction:column; gap:2px;">
+                    <span class="lesson-title-text">${lesson.title}</span>
+                    <span style="font-size:10px; color:var(--text-muted); opacity:0.6;">الدرس ${uIdx + 1}-${globalNum}</span>
+                  </div>
+                  <span class="lesson-check">${done ? '✅' : '⏳'}</span>
+                </div>`;
+                });
+                unitsHTML += `
+              <div class="unit-accordion">
+                <div class="unit-header" onclick="toggleUnit(this)">
+                  <span>📦 ${unit.name}</span>
+                  <span class="arrow">▼</span>
+                </div>
+                <div class="unit-body">
+                  ${lessonsHTML}
+                  <div class="quiz-btn-mini" onclick="startUnitQuiz('${subjId}', ${uIdx})" style="margin:10px; background:rgba(16,185,129,0.1); color:var(--teal); border:1px solid rgba(16,185,129,0.2); border-radius:10px; padding:10px; text-align:center; font-size:12px; font-weight:700; cursor:pointer;">
+                    🧪 اختبر نفسك في هذه الوحدة
+                  </div>
+                </div>
+              </div>`;
+            });
+
+            const themeIcon2 = getTheme() === 'dark' ? '☀️' : '🌙';
+            const themeLabel2 = getTheme() === 'dark' ? 'نهاري' : 'ليلي';
+
+            renderScreen(`
+            <div class="screen active" id="subjectScreen">
+              <div class="screen-scroll">
+                <div class="back-btn-row" onclick="goBackFromSubject()">
+                  <span class="back-arrow">←</span> رجوع للرئيسية
+                </div>
+                <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
+                  <div></div>
+                  <button class="theme-toggle-btn" onclick="toggleTheme()" title="تغيير الوضع إلى ${themeLabel2}" style="width:32px;height:32px;font-size:15px;">${themeIcon2}</button>
+                </div>
+                <div style="text-align:center; margin-bottom:16px;">
+                  <div style="width:80px; height:80px; margin:0 auto 8px; display:flex; align-items:center; justify-content:center; font-size:44px;">
+                    ${subj.icon && subj.icon.startsWith('data:image/') 
+                        ? `<img src="${subj.icon}" style="width:100%; height:100%; border-radius:16px; object-fit:cover; box-shadow:0 8px 16px rgba(0,0,0,0.2);">` 
+                        : subj.icon}
+                  </div>
+                  <h2 style="color:var(--text-primary); font-size:18px; font-weight:800; margin-top:4px;">${subj.name}</h2>
+                  <div style="font-size:12px; color:var(--blue-light); opacity:0.7;">${prog.completed}/${prog.total} درس مكتمل · ${prog.percent}%</div>
+                  <div style="width:100%; height:5px; background:rgba(128,128,128,0.12); border-radius:6px; margin-top:8px; overflow:hidden;">
+                    <div style="height:100%; background:linear-gradient(90deg, var(--blue-bright), var(--teal)); border-radius:6px; width:${prog.percent}%; transition:width 0.6s;"></div>
+                  </div>
+                </div>
+                ${unitsHTML}
+              </div>
+            </div>
+          `);
+            setTimeout(() => {
+                const firstHeader = document.querySelector('.unit-header');
+                if (firstHeader) toggleUnit(firstHeader);
+            }, 100);
+            currentScreen = 'subject';
+        }
+
+        function toggleUnit(headerEl) {
+            const body = headerEl.nextElementSibling;
+            if (body) {
+                const isOpen = body.classList.contains('open');
+                body.classList.toggle('open', !isOpen);
+                headerEl.classList.toggle('open', !isOpen);
+            }
+            playClick();
+        }
+
+        function goBackFromSubject() {
+            navigationStack.pop();
+            if (navigationStack.length === 0) {
+                switchTab('home');
+            } else {
+                const prev = navigationStack[navigationStack.length - 1];
+                if (prev.screen === 'subject') {
+                    openSubject(prev.subjId);
+                } else {
+                    switchTab('home');
+                }
+            }
+        }
+
+        // ==================== LESSON VIEW (مع تبويبات) ====================
+        async function openLessonView(subjId, unitIdx, lessonIdx) {
+            const subjects = await getSubjectsData();
+            if (!subjects || !subjects[subjId]) return;
+            const unit = subjects[subjId].units[unitIdx];
+            if (!unit) return;
+            const lesson = unit.lessons[lessonIdx];
+            if (!lesson) return;
+            const lessonId = lesson.id;
+            
+            navigationStack.push({ screen: 'lesson', subjId, unitIdx, lessonIdx });
+            currentScreen = 'lesson';
+            
+            const done = userData.completedLessons.includes(lessonId);
+            const statusBadge = done ? '✅ مكتمل' : '⏳ قيد الدراسة';
+            
+            const themeIcon3 = getTheme() === 'dark' ? '☀️' : '🌙';
+            const themeLabel3 = getTheme() === 'dark' ? 'نهاري' : 'ليلي';
+            renderScreen(`
+                <div class="screen active" id="lessonScreen">
+                    <div class="screen-scroll">
+                        <div class="screen-header" style="justify-content:space-between; margin-bottom:20px;">
+                            <button onclick="goBackFromLesson()" style="background:none; border:none; color:var(--blue-light); font-weight:700; cursor:pointer; font-size:14px; display:flex; align-items:center; gap:5px;">
+                                🔙 رجوع
+                            </button>
+                            <div class="header-greeting" style="flex:1; text-align:center;">
+                                <div class="greeting-main" style="font-size:16px;">${lesson.title}</div>
+                            </div>
+                            <button class="theme-toggle-btn" onclick="toggleTheme()" title="تغيير الوضع إلى ${themeLabel3}" style="width:32px;height:32px;font-size:15px;">${themeIcon3}</button>
+                        </div>
+                        
+                        <div style="text-align:center; margin-bottom:15px;">
+                            <span style="font-size:12px; font-weight:700; color:var(--teal); background:rgba(16,185,129,0.1); padding:4px 12px; border-radius:20px;">${statusBadge}</span>
+                        </div>
+
+                        <!-- التبويبات (Tabs) -->
+                        <div class="lesson-tabs-nav" id="lessonTabsNav-${lessonId}" style="display:flex; background:rgba(15,23,42,0.5); padding:5px; border-radius:15px; margin-bottom:20px; border:1px solid var(--glass-border); position:sticky; top:0; z-index:10; backdrop-filter:blur(10px);">
+                            <button class="lesson-tab-btn active" onclick="switchLessonTab('${lessonId}', 'text')" id="tab-btn-text-${lessonId}" style="flex:1; padding:10px; border-radius:12px; border:none; background:transparent; color:white; cursor:pointer; font-size:12px; font-weight:700;">📄 الدرس</button>
+                            <button class="lesson-tab-btn" onclick="switchLessonTab('${lessonId}', 'video')" id="tab-btn-video-${lessonId}" style="flex:1; padding:10px; border-radius:12px; border:none; background:transparent; color:var(--text-muted); cursor:pointer; font-size:12px; font-weight:700;">🎥 فيديو</button>
+                            <button class="lesson-tab-btn" onclick="switchLessonTab('${lessonId}', 'quiz')" id="tab-btn-quiz-${lessonId}" style="flex:1; padding:10px; border-radius:12px; border:none; background:transparent; color:var(--text-muted); cursor:pointer; font-size:12px; font-weight:700;">❓ اختبار</button>
+                        </div>
+
+                        <div class="lesson-full-content" style="min-height:300px;">
+                            <!-- لوحة النص مع أدوات التحكم بالخط -->
+                            <div class="lesson-tab-panel active" id="tab-panel-text-${lessonId}">
+                                <div style="display:flex; justify-content:center; gap:8px; margin-bottom:15px; padding:10px; background:rgba(255,255,255,0.02); border-radius:15px; border:1px solid var(--glass-border);">
+                                    <button onclick="changeLessonFont(2)" style="flex:1; padding:8px; border-radius:10px; border:none; background:var(--blue-bright); color:white; cursor:pointer; font-weight:700; font-size:13px;">➕ تكبير الخط</button>
+                                    <button onclick="changeLessonFont(-2)" style="flex:1; padding:8px; border-radius:10px; border:none; background:var(--bg-mid); border:1px solid var(--glass-border); color:white; cursor:pointer; font-weight:700; font-size:13px;">➖ تصغير</button>
+                                    <button onclick="resetLessonFont()" style="flex:1; padding:8px; border-radius:10px; border:none; background:var(--bg-card); border:1px solid var(--glass-border); color:var(--text-secondary); cursor:pointer; font-weight:700; font-size:13px;">↻ ضبط</button>
+                                </div>
+                                <div class="lesson-text-block" id="lessonTextContent-${lessonId}" style="font-size:16px; line-height:1.8; color:var(--text-primary); transition:all 0.2s;">${lesson.text}</div>
+                                <button onclick="openFeedbackModal('${lessonId}', '${lesson.title.replace(/'/g, "\\'")}')" style="margin-top:20px; width:100%; padding:10px; border-radius:12px; border:1px solid var(--glass-border); background:rgba(255,255,255,0.02); color:var(--text-secondary); font-size:12px; cursor:pointer;">📝 ملاحظة على محتوى الدرس</button>
+                            </div>
+                            <div class="lesson-tab-panel" id="tab-panel-video-${lessonId}">
+                                <div class="video-wrapper" style="border-radius:16px; overflow:hidden; border:1px solid var(--glass-border); background:#000;">
+                                    ${(() => {
+                                        if (!lesson.video) return '<p style="text-align:center; padding:40px; color:var(--text-muted);">لا يوجد فيديو لهذا الدرس</p>';
+                                        let videoUrl = lesson.video;
+                                        if (videoUrl.includes('youtube.com') || videoUrl.includes('youtu.be')) {
+                                            let videoId = '';
+                                            if (videoUrl.includes('v=')) videoId = videoUrl.split('v=')[1].split('&')[0];
+                                            else if (videoUrl.includes('shorts/')) videoId = videoUrl.split('shorts/')[1].split('?')[0];
+                                            else if (videoUrl.includes('youtu.be/')) videoId = videoUrl.split('youtu.be/')[1].split('?')[0];
+                                            videoUrl = `https://www.youtube.com/embed/${videoId}`;
+                                        }
+                                        return `<iframe src="${videoUrl}" style="width:100%; aspect-ratio:16/9; border:none;" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
+                                    })()}
+                                </div>
+                            </div>
+                            <div class="lesson-tab-panel" id="tab-panel-quiz-${lessonId}">
+                                <div id="quiz-container-${lessonId}"></div>
+                                <button class="btn-sm" id="submit-quiz-${lessonId}" onclick="submitLessonQuiz('${lessonId}')" style="margin-top:20px; width:100%; padding:14px; background:var(--blue-bright); color:white; border:none; border-radius:12px; font-weight:800; cursor:pointer;">✔ تسليم الإجابات</button>
+                                <div id="quiz-result-${lessonId}" class="quiz-result" style="display:none; margin-top:15px; padding:15px; border-radius:12px; background:rgba(16,185,129,0.1); border:1px solid var(--teal); color:var(--teal); text-align:center; font-weight:700;"></div>
+                                <button onclick="openFeedbackModal('${lessonId}', '${lesson.title.replace(/'/g, "\\'")}')" style="margin-top:15px; width:100%; padding:10px; border-radius:12px; border:1px solid var(--glass-border); background:var(--bg-card); color:var(--text-secondary); font-weight:700; cursor:pointer; font-size:13px;">📝 ملاحظة حول الاختبار</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `);
+            renderLessonQuiz(lesson);
+            // حفظ معرف الدرس الحالي للتبويبات
+            window._currentLessonId = lessonId;
+        }
+
+        function switchLessonTab(lessonId, tabName) {
+            // إخفاء كل اللوحات الخاصة بهذا الدرس تحديداً
+            const container = document.getElementById(`lessonTabsNav-${lessonId}`).parentElement;
+            const panels = container.querySelectorAll('.lesson-tab-panel');
+            panels.forEach(p => p.classList.remove('active'));
+            
+            // إظهار اللوحة المطلوبة
+            const targetPanel = document.getElementById(`tab-panel-${tabName}-${lessonId}`);
+            if (targetPanel) targetPanel.classList.add('active');
+
+            // تحديث الأزرار
+            const buttons = document.querySelectorAll(`#lessonTabsNav-${lessonId} .lesson-tab-btn`);
+            buttons.forEach(b => {
+                b.classList.remove('active');
+                b.style.color = 'var(--text-muted)';
+            });
+            const targetBtn = document.getElementById(`tab-btn-${tabName}-${lessonId}`);
+            if (targetBtn) {
+                targetBtn.classList.add('active');
+                targetBtn.style.color = 'white';
+            }
+
+            playClick();
+        }
+
+        function goBackFromLesson() {
+            navigationStack.pop();
+            const prev = navigationStack[navigationStack.length - 1];
+            if (prev && prev.screen === 'subject') {
+                openSubject(prev.subjId);
+            } else {
+                switchTab('home');
+            }
+        }
+
+        // ==================== أدوات التحكم بخط الدرس ====================
+        let currentLessonFontSize = 16;
+
+        function changeLessonFont(delta) {
+            const lessonId = window._currentLessonId;
+            const el = document.getElementById(`lessonTextContent-${lessonId}`);
+            if (!el) return;
+            currentLessonFontSize = Math.max(12, Math.min(32, currentLessonFontSize + delta));
+            el.style.fontSize = currentLessonFontSize + 'px';
+        }
+
+        function resetLessonFont() {
+            const lessonId = window._currentLessonId;
+            currentLessonFontSize = 16;
+            const el = document.getElementById(`lessonTextContent-${lessonId}`);
+            if (el) el.style.fontSize = '16px';
+        }
+
+        // ==================== نظام ملاحظات الطلاب ====================
+        function openFeedbackModal(lessonId, lessonTitle) {
+            // إنشاء نافذة منبثقة أنيقة للملاحظات
+            const modal = document.createElement('div');
+            modal.className = 'modal active';
+            modal.id = 'feedbackModal';
+            modal.innerHTML = `
+                <div class="modal-content" style="max-width:400px; padding:24px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+                        <h3 style="margin:0; font-size:16px;">📝 إرسال ملاحظة</h3>
+                        <button onclick="closeFeedbackModal()" style="background:none; border:none; font-size:22px; color:var(--text-muted); cursor:pointer;">✕</button>
+                    </div>
+                    <p style="font-size:12px; color:var(--text-muted); margin-bottom:16px;">ملاحظتك على درس: <span style="color:var(--blue-light); font-weight:700;">${lessonTitle}</span></p>
+                    <textarea id="feedbackText" rows="5" placeholder="اكتب ملاحظتك أو اقتراحك هنا... (مثال: لو تضيفون شرح أكثر لهذا الجزء)" style="width:100%; padding:12px; border-radius:12px; background:var(--bg-body); border:1px solid var(--glass-border); color:var(--text-primary); resize:none; outline:none; font-size:14px; line-height:1.8;"></textarea>
+                    <button id="sendFeedbackBtn" onclick="sendFeedback('${lessonId}', '${lessonTitle}')" style="width:100%; margin-top:12px; padding:14px; background:linear-gradient(90deg, #f59e0b, #f97316); border:none; border-radius:12px; color:white; font-weight:800; cursor:pointer; font-size:14px;">إرسال الملاحظة ✨</button>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+
+        function closeFeedbackModal() {
+            const m = document.getElementById('feedbackModal');
+            if (m) m.remove();
+        }
+
+        async function sendFeedback(lessonId, lessonTitle) {
+            const text = document.getElementById('feedbackText').value.trim();
+            if (!text) {
+                showToast('يرجى كتابة ملاحظتك أولاً', 'error');
+                return;
+            }
+            
+            const btn = document.getElementById('sendFeedbackBtn');
+            btn.disabled = true;
+            btn.textContent = 'جاري الإرسال...';
+
+            try {
+                await db.collection('feedback').add({
+                    studentName: userData.name || 'طالب',
+                    studentId: auth.currentUser.uid,
+                    lessonId: lessonId,
+                    lessonTitle: lessonTitle,
+                    message: text,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    read: false
+                });
+                showToast('تم إرسال ملاحظتك بنجاح! شكراً لك 🎉', 'success');
+                closeFeedbackModal();
+            } catch (e) {
+                console.error(e);
+                showToast('فشل في إرسال الملاحظة', 'error');
+                btn.disabled = false;
+                btn.textContent = 'إرسال الملاحظة ✨';
+            }
+        }
+
+        let selectedAnswers = {};
+
+        function renderLessonQuiz(lesson) {
+            const container = document.getElementById(`quiz-container-${lesson.id}`);
+            if (!container) return;
+            
+            if (!lesson.quiz || lesson.quiz.length === 0) {
+                container.innerHTML = `<div style="text-align:center; padding:40px; color:var(--text-muted);"><p>لا يوجد اختبار متاح حالياً.</p></div>`;
+                const submitBtn = document.getElementById(`submit-quiz-${lesson.id}`);
+                if (submitBtn) submitBtn.style.display = 'none';
+                return;
+            }
+
+            let html = '';
+            lesson.quiz.forEach((q, idx) => {
+                // بعثرة الخيارات مع حفظ الاندكس الأصلي
+                let optsWithIdx = q.options.map((opt, i) => ({ text: opt, originalIdx: i }));
+                optsWithIdx = optsWithIdx.sort(() => Math.random() - 0.5);
+
+                html += `<div class="quiz-question" style="background:rgba(255,255,255,0.02); padding:15px; border-radius:12px; margin-bottom:15px; border:1px solid var(--glass-border);">
+                            <p style="font-weight:700; margin-bottom:12px; color:var(--text-primary);">${idx + 1}. ${q.q}</p>`;
+                
+                optsWithIdx.forEach((optObj) => {
+                    html += `<div class="quiz-option" data-orig-index="${optObj.originalIdx}" onclick="selectQuizOption(this,'${lesson.id}',${idx},${optObj.originalIdx})">${optObj.text}</div>`;
+                });
+                html += `</div>`;
+            });
+            container.innerHTML = html;
+            
+            const resultDiv = document.getElementById(`quiz-result-${lesson.id}`);
+            if (resultDiv) resultDiv.style.display = 'none';
+            const submitBtn = document.getElementById(`submit-quiz-${lesson.id}`);
+            if (submitBtn) { submitBtn.style.display = 'block'; submitBtn.disabled = false; }
+        }
+
+        function selectQuizOption(el, lessonId, qIdx, optIdx) {
+            el.parentElement.querySelectorAll('.quiz-option').forEach(s => s.classList.remove('selected'));
+            el.classList.add('selected');
+            playClick();
+            if (!selectedAnswers[lessonId]) selectedAnswers[lessonId] = {};
+            selectedAnswers[lessonId][qIdx] = optIdx;
+        }
+
+        async function submitLessonQuiz(lessonId) {
+            const lesson = await DB.findLessonById(lessonId);
+            if (!lesson || !selectedAnswers[lessonId]) {
+                showToast('يرجى الإجابة على جميع الأسئلة', 'error');
+                return;
+            }
+            const answered = Object.keys(selectedAnswers[lessonId]).length;
+            if (answered < lesson.quiz.length) {
+                showToast('يرجى الإجابة على جميع الأسئلة', 'error');
+                return;
+            }
+            let score = 0;
+            lesson.quiz.forEach((q, idx) => {
+                const selectedOrigIdx = selectedAnswers[lessonId][idx];
+                const correctOrigIdx = q.correct;
+                
+                const questionContainer = document.querySelectorAll(`#quiz-container-${lessonId} .quiz-question`)[idx];
+                if (!questionContainer) return;
+                
+                const optEls = questionContainer.querySelectorAll('.quiz-option');
+                
+                optEls.forEach(optEl => {
+                    const thisOrigIdx = parseInt(optEl.getAttribute('data-orig-index'));
+                    if (thisOrigIdx === correctOrigIdx) {
+                        optEl.classList.add('correct');
+                    }
+                    if (thisOrigIdx === selectedOrigIdx) {
+                        if (selectedOrigIdx === correctOrigIdx) {
+                            score++;
+                        } else {
+                            optEl.classList.add('wrong');
+                        }
+                    }
+                });
+            });
+            const total = lesson.quiz.length;
+            const percentage = Math.round((score / total) * 100);
+            
+            // حفظ النتيجة في Firestore لكي يراها الأدمن
+            try {
+                db.collection('quizResults').add({
+                    studentName: userData.name || 'طالب',
+                    studentId: auth.currentUser.uid,
+                    lessonId: lessonId,
+                    lessonTitle: lesson.title,
+                    score: score,
+                    total: total,
+                    percentage: percentage,
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                });
+            } catch (e) {
+                console.error("Error saving result:", e);
+            }
+
+            const resultDiv = document.getElementById(`quiz-result-${lessonId}`);
+            if (resultDiv) {
+                resultDiv.style.display = 'block';
+                resultDiv.innerHTML = `
+                    <div style="font-size:18px; font-weight:800; color:var(--blue-light); margin-bottom:5px;">نتيجتك: ${score} / ${total}</div>
+                    <div style="font-size:14px; opacity:0.8;">النسبة: ${percentage}%</div>
+                `;
+            }
+
+            const passThreshold = Math.ceil(0.7 * total);
+            const submitBtn = document.getElementById(`submit-quiz-${lessonId}`);
+            
+            if (score >= passThreshold) {
+                playCorrect();
+                if (!userData.completedLessons.includes(lessonId)) {
+                    userData.completedLessons.push(lessonId);
+                    addXP(20);
+                    updateStreak();
+                    saveData();
+                    showToast('✨ تم إكمال الدرس! +20 XP', 'success');
+                } else {
+                    showToast('لقد أكملت هذا الدرس مسبقاً', 'info');
+                }
+                if (submitBtn) submitBtn.disabled = true;
+            } else {
+                playWrong();
+                showToast(`تحتاج ${passThreshold}/${total} على الأقل للإكمال. حاول مجدداً`, 'error');
+                // لا نعطل الزر هنا لكي يتمكن من المحاولة مرة أخرى لاحقاً أو إعادة التحميل
+                if (submitBtn) {
+                    submitBtn.textContent = '🔄 حاول مرة أخرى';
+                    submitBtn.disabled = false;
+                }
+            }
+        }
+
+        // ==================== UNIT QUIZ ====================
+        async function startUnitQuiz(subjId, unitIdx) {
+            const subjects = await getSubjectsData();
+            if (!subjects || !subjects[subjId]) return;
+            const unit = subjects[subjId].units[unitIdx];
+            if (!unit) return;
+            let allQuestions = [];
+            unit.lessons.forEach(lesson => {
+                lesson.quiz.forEach(q => {
+                    allQuestions.push({ ...q, lessonId: lesson.id, lessonTitle: lesson.title });
+                });
+            });
+            if (allQuestions.length === 0) {
+                showToast('لا توجد أسئلة متاحة لهذه الوحدة', 'error');
+                return;
+            }
+            const shuffled = allQuestions.sort(() => Math.random() - 0.5);
+            const selected = shuffled.slice(0, Math.min(5, shuffled.length));
+            const tempQuizId = `unit-quiz-${subjId}-${unitIdx}`;
+            const tempLesson = { id: tempQuizId, title: `اختبار ${unit.name}`,
+        quiz: selected };
+
+        navigationStack.push({ screen: 'unitQuiz', subjId, unitIdx });
+        currentScreen = 'unitQuiz';
+
+        renderScreen(`
+        <div class="screen active" id="unitQuizScreen">
+          <div class="screen-scroll">
+            <div class="back-btn-row" onclick="goBackFromUnitQuiz('${subjId}')">
+              <span class="back-arrow">←</span> رجوع للمادة
+            </div>
+            <h3 style="color:var(--text-primary); font-size:17px; font-weight:800; margin-bottom:14px; text-align:center;">🧪 ${tempLesson.title}</h3>
+            <div id="quiz-container-${tempQuizId}"></div>
+            <button class="btn-sm" id="submit-quiz-${tempQuizId}" onclick="submitUnitQuiz('${tempQuizId}')" style="margin-top:10px;">✔ تسليم الإجابات</button>
+            <div id="quiz-result-${tempQuizId}" class="quiz-result" style="display:none;"></div>
+          </div>
+        </div>
+      `);
+      renderLessonQuiz(tempLesson);
+    }
+
+    function goBackFromUnitQuiz(subjId) {
+      navigationStack.pop();
+      openSubject(subjId);
+    }
+
+    function submitUnitQuiz(tempQuizId) {
+      const container = document.getElementById(`quiz-container-${tempQuizId}`);
+      if (!container) return;
+      const questionEls = container.querySelectorAll('.quiz-question');
+      const lessonData = { id: tempQuizId, quiz: [] };
+      questionEls.forEach((qEl, idx) => {
+        const options = qEl.querySelectorAll('.quiz-option');
+        const correctEl = qEl.querySelector('.quiz-option.correct');
+        let correctIdx = 0;
+        if (correctEl) {
+          options.forEach((opt, oi) => { if (opt === correctEl) correctIdx = oi; });
+        }
+        lessonData.quiz.push({
+          q: qEl.querySelector('p')?.textContent || `سؤال ${idx+1}`,
+          options: Array.from(options).map(o => o.textContent),
+          correct: correctIdx
+        });
+      });
+
+      if (!selectedAnswers[tempQuizId]) {
+        showToast('يرجى الإجابة على جميع الأسئلة', 'error');
+        return;
+      }
+      const answered = Object.keys(selectedAnswers[tempQuizId]).length;
+      if (answered < lessonData.quiz.length) {
+        showToast('يرجى الإجابة على جميع الأسئلة', 'error');
+        return;
+      }
+      let score = 0;
+      lessonData.quiz.forEach((q, idx) => {
+        const selected = selectedAnswers[tempQuizId][idx];
+        const correct = q.correct;
+        const optEls = document.querySelectorAll(`#quiz-container-${tempQuizId} .quiz-question`)[idx]?.querySelectorAll('.quiz-option');
+        if (!optEls) return;
+        if (selected !== undefined) {
+          optEls[selected].classList.add(selected === correct ? 'correct' : 'wrong');
+          if (selected === correct) score++;
+        }
+        optEls[correct].classList.add('correct');
+      });
+      const total = lessonData.quiz.length;
+      const resultDiv = document.getElementById(`quiz-result-${tempQuizId}`);
+      if (resultDiv) {
+        resultDiv.style.display = 'block';
+        resultDiv.textContent = `نتيجتك: ${score} / ${total}`;
+      }
+      const submitBtn = document.getElementById(`submit-quiz-${tempQuizId}`);
+      if (score >= Math.ceil(0.7 * total)) {
+        playCorrect();
+        addXP(10);
+        saveData();
+        showToast(`✨ نتيجة رائعة! ${score}/${total} · +10 XP`, 'success');
+        if (submitBtn) submitBtn.disabled = true;
+      } else {
+        playWrong();
+        showToast(`تحتاج ${Math.ceil(0.7*total)}/${total} على الأقل. حاول مجدداً`, 'error');
+        if (submitBtn) submitBtn.disabled = true;
+      }
+      delete selectedAnswers[tempQuizId];
+    }
+
+    // ==================== PLATFORM SCREEN ====================
+    async function showPlatformScreen() {
+      currentScreen = 'platform';
+      const subjects = await getSubjectsData();
+      let subjectsListHTML = '';
+      if (subjects) {
+        for (let subjId in subjects) {
+          const subj = subjects[subjId];
+          const isImg = subj.icon && subj.icon.startsWith('data:image/');
+          const iconDisplay = isImg ? `<img src="${subj.icon}" style="width:100%;height:100%;border-radius:8px;object-fit:cover;">` : subj.icon;
+          
+          subjectsListHTML += `
+            <div class="service-card" onclick="startRandomSubjectQuiz('${subjId}')">
+              <div class="service-icon">${iconDisplay}</div>
+              <div class="service-info">
+                <div class="service-name">اختبر نفسك في ${subj.name}</div>
+                <div class="service-desc">اختبار عشوائي من جميع دروس المادة</div>
+              </div>
+              <span class="service-arrow">←</span>
+            </div>`;
+        }
+      }
+
+      const themeIcon4 = getTheme() === 'dark' ? '☀️' : '🌙';
+      const themeLabel4 = getTheme() === 'dark' ? 'نهاري' : 'ليلي';
+
+      renderScreen(`
+        <div class="screen active" id="platformScreen">
+          <div class="screen-scroll">
+            <div class="screen-header">
+              <div class="header-greeting">
+                <div class="greeting-main">🖥️ المنصة</div>
+                <div class="greeting-sub">خدمات تعليمية متكاملة</div>
+              </div>
+              <button class="theme-toggle-btn" onclick="toggleTheme()" title="تغيير الوضع إلى ${themeLabel4}">${themeIcon4}</button>
+            </div>
+            <div style="font-size:13px; font-weight:700; color:var(--blue-light); margin-bottom:12px; opacity:0.75;">🧪 اختبر نفسك</div>
+            <div style="margin-bottom:16px;">
+              ${subjectsListHTML}
+            </div>
+            <div class="service-card" style="opacity:0.6; cursor:default;">
+              <div class="service-icon">🏆</div>
+              <div class="service-info">
+                <div class="service-name">تحديات مباشرة</div>
+                <div class="service-desc">قريباً - تنافس مع زملائك</div>
+              </div>
+              <span class="service-arrow" style="color:var(--text-muted);">←</span>
+            </div>
+            <div class="service-card" style="opacity:0.6; cursor:default;">
+              <div class="service-icon">📊</div>
+              <div class="service-info">
+                <div class="service-name">تقارير تفصيلية</div>
+                <div class="service-desc">قريباً - تحليل أدائك الدراسي</div>
+              </div>
+              <span class="service-arrow" style="color:var(--text-muted);">←</span>
+            </div>
+          </div>
+        </div>
+      `);
+    }
+
+    async function startRandomSubjectQuiz(subjId) {
+      const subjects = await getSubjectsData();
+      if (!subjects || !subjects[subjId]) return;
+      const subj = subjects[subjId];
+      let allQuestions = [];
+      subj.units.forEach(unit => {
+        unit.lessons.forEach(lesson => {
+          lesson.quiz.forEach(q => {
+            allQuestions.push({ ...q, lessonId: lesson.id, lessonTitle: lesson.title });
+          });
+        });
+      });
+      if (allQuestions.length === 0) {
+        showToast('لا توجد أسئلة متاحة لهذه المادة', 'error');
+        return;
+      }
+      const shuffled = allQuestions.sort(() => Math.random() - 0.5);
+      const selected = shuffled.slice(0, Math.min(8, shuffled.length));
+      const tempQuizId = `random-subj-quiz-${subjId}`;
+      const tempLesson = { id: tempQuizId, title: `اختبار عشوائي - ${subj.name}`, quiz: selected };
+
+      navigationStack.push({ screen: 'randomQuiz', subjId });
+      currentScreen = 'randomQuiz';
+
+      renderScreen(`
+        <div class="screen active" id="randomQuizScreen">
+          <div class="screen-scroll">
+            <div class="back-btn-row" onclick="goBackFromRandomQuiz()">
+              <span class="back-arrow">←</span> رجوع للمنصة
+            </div>
+            <h3 style="color:var(--text-primary); font-size:17px; font-weight:800; margin-bottom:14px; text-align:center;">🧪 ${tempLesson.title}</h3>
+            <div id="quiz-container-${tempQuizId}"></div>
+            <button class="btn-sm" id="submit-quiz-${tempQuizId}" onclick="submitRandomQuiz('${tempQuizId}')" style="margin-top:10px;">✔ تسليم الإجابات</button>
+            <div id="quiz-result-${tempQuizId}" class="quiz-result" style="display:none;"></div>
+          </div>
+        </div>
+      `);
+      renderLessonQuiz(tempLesson);
+    }
+
+    function goBackFromRandomQuiz() {
+      navigationStack.pop();
+      switchTab('platform');
+    }
+
+    function submitRandomQuiz(tempQuizId) {
+      submitUnitQuiz(tempQuizId);
+    }
+
+    // ==================== ACHIEVEMENTS SCREEN (الزر الوسط) ====================
+    async function showAchievementsScreen() {
+      currentScreen = 'achievements';
+      navigationStack = [];
+      currentSubjectId = null;
+      const progress = await getOverallProgress();
+      const totalCompleted = await getCompletedCount();
+      const totalLessons = await getTotalLessonsCount();
+
+      // حساب الإنجازات
+      const achievements = [
+        { icon: '🌟', title: 'بداية الطريق', desc: 'أكمل أول درس لك', unlocked: totalCompleted >= 1,
+            progress: Math.min(totalCompleted, 1), target: 1 },
+        { icon: '🔥', title: 'أسبوع من التعلم', desc: 'حافظ على التعلم لمدة 7 أيام متتالية', unlocked: userData
+                .streak >= 7, progress: Math.min(userData.streak, 7), target: 7 },
+        { icon: '📚', title: 'طالب مجتهد', desc: 'أكمل 10 دروس', unlocked: totalCompleted >= 10,
+            progress: Math.min(totalCompleted, 10), target: 10 },
+        { icon: '🏅', title: 'نصف الطريق', desc: `أكمل 50% من المنهج (${Math.round(totalLessons/2)} درس)`,
+            unlocked: progress.percent >= 50, progress: Math.min(totalCompleted, Math.round(totalLessons /
+                2)), target: Math.round(totalLessons / 2) },
+        { icon: '🧠', title: 'العبقري الصغير', desc: 'أكمل اختبار بدرجة 100%', unlocked: totalCompleted >= 3,
+            progress: totalCompleted >= 3 ? 1 : 0, target: 1 },
+        { icon: '⚡', title: 'خبير الخبرة', desc: 'اجمع 500 نقطة خبرة', unlocked: userData.xp >= 500,
+            progress: Math.min(userData.xp, 500), target: 500 },
+      ];
+
+      let achievementsHTML = '';
+      achievements.forEach(ach => {
+        const percent = Math.round((ach.progress / ach.target) * 100);
+        achievementsHTML += `
+        <div class="achievement-card" style="opacity:${ach.unlocked ? '1' : '0.55'};">
+          <div class="achievement-icon">${ach.unlocked ? ach.icon : '🔒'}</div>
+          <div class="achievement-info" style="flex:1;">
+            <div class="ach-title">${ach.title} ${ach.unlocked ? '✅' : ''}</div>
+            <div class="ach-desc">${ach.desc}</div>
+            <div style="width:100%; height:4px; background:rgba(128,128,128,0.15); border-radius:4px; margin-top:6px; overflow:hidden;">
+              <div style="height:100%; background:linear-gradient(90deg, var(--blue-bright), var(--teal)); border-radius:4px; width:${percent}%; transition:width 0.6s;"></div>
+            </div>
+          </div>
+        </div>`;
+      });
+
+      const themeIcon5 = getTheme() === 'dark' ? '☀️' : '🌙';
+      const themeLabel5 = getTheme() === 'dark' ? 'نهاري' : 'ليلي';
+
+      renderScreen(`
+        <div class="screen active" id="achievementsScreen">
+          <div class="screen-scroll">
+            <div class="screen-header">
+              <div class="header-greeting">
+                <div class="greeting-main">🏆 الإنجازات والتحديات</div>
+                <div class="greeting-sub">تتبع تقدمك وافتح الشارات</div>
+              </div>
+              <button class="theme-toggle-btn" onclick="toggleTheme()" title="تغيير الوضع إلى ${themeLabel5}">${themeIcon5}</button>
+            </div>
+            <div style="background:var(--bg-card); border:1px solid var(--glass-border); border-radius:var(--radius-md); padding:16px; margin-bottom:16px; text-align:center;">
+              <div style="font-size:40px;">🏅</div>
+              <div style="font-size:18px; font-weight:800; color:var(--text-primary);">المستوى ${userData.level}</div>
+              <div style="font-size:12px; color:var(--blue-light);">${userData.xp} نقطة خبرة · ${userData.streak} يوم متواصل 🔥</div>
+              <div style="width:100%; height:6px; background:rgba(128,128,128,0.12); border-radius:6px; margin-top:10px; overflow:hidden;">
+                <div style="height:100%; background:linear-gradient(90deg, #f59e0b, #eab308); border-radius:6px; width:${userData.xp % 100}%; transition:width 0.6s;"></div>
+              </div>
+              <div style="font-size:10px; color:var(--text-muted); margin-top:4px;">${userData.xp % 100} / 100 XP للمستوى التالي</div>
+            </div>
+            <div style="font-size:13px; font-weight:700; color:var(--blue-light); margin-bottom:10px; opacity:0.75;">🎯 الإنجازات</div>
+            ${achievementsHTML}
+            <div style="text-align:center; margin-top:16px;">
+              <button class="btn-sm" onclick="switchTab('home')">🏠 العودة للرئيسية</button>
+            </div>
+          </div>
+        </div>
+      `);
+    }
+
+    // ==================== SUMMARY SCREEN ====================
+    async function showSummaryScreen() {
+      currentScreen = 'summary';
+      const subjects = await getSubjectsData();
+      let subjectsHTML = '';
+      if (subjects) {
+        for (let subjId in subjects) {
+          const subj = subjects[subjId];
+          const isImg = subj.icon && subj.icon.startsWith('data:image/');
+          const iconDisplay = isImg ? `<img src="${subj.icon}" style="width:40px;height:40px;border-radius:8px;object-fit:cover;">` : `<span style="font-size:30px;">${subj.icon}</span>`;
+
+          subjectsHTML += `
+            <div class="summary-subject-card" onclick="showSubjectSummary('${subjId}')">
+              ${iconDisplay}
+              <div style="flex:1;">
+                <div style="font-size:15px; font-weight:700; color:var(--text-primary);">${subj.name}</div>
+                <div style="font-size:11px; color:var(--blue-light); opacity:0.6;">أهم العبارات والقوانين</div>
+              </div>
+              <span style="color:var(--blue-glow);">←</span>
+            </div>`;
+        }
+      }
+      const themeIcon6 = getTheme() === 'dark' ? '☀️' : '🌙';
+      const themeLabel6 = getTheme() === 'dark' ? 'نهاري' : 'ليلي';
+
+      renderScreen(`
+        <div class="screen active" id="summaryScreen">
+          <div class="screen-scroll">
+            <div class="screen-header">
+              <div class="header-greeting">
+                <div class="greeting-main">📋 الملخصات</div>
+                <div class="greeting-sub">أهم العبارات والقوانين لكل مادة</div>
+              </div>
+              <button class="theme-toggle-btn" onclick="toggleTheme()" title="تغيير الوضع إلى ${themeLabel6}">${themeIcon6}</button>
+            </div>
+            ${subjectsHTML}
+          </div>
+        </div>
+      `);
+    }
+
+    async function showSubjectSummary(subjId) {
+      const subjects = await getSubjectsData();
+      if (!subjects || !subjects[subjId]) return;
+      const subj = subjects[subjId];
+      navigationStack.push({ screen: 'summaryDetail', subjId });
+      currentScreen = 'summaryDetail';
+
+      let summariesHTML = '';
+      subj.units.forEach(unit => {
+        unit.lessons.forEach(lesson => {
+          if (lesson.summary) {
+              summariesHTML += `
+                <div style="background:var(--bg-card); border:1px solid var(--glass-border); border-radius:20px; padding:20px; margin-bottom:20px; box-shadow:0 10px 25px rgba(0,0,0,0.2);">
+                    <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px; border-bottom:1px solid var(--glass-border); padding-bottom:10px;">
+                        <span style="font-size:24px;">📘</span>
+                        <h3 style="font-size:16px; font-weight:800; color:var(--blue-light);">${lesson.title}</h3>
+                    </div>
+                    <div class="summary-text-box" style="font-size:16px; line-height:1.8; color:var(--text-primary); transition:all 0.2s;">
+                        ${lesson.summary}
+                    </div>
+                    <button onclick="openFeedbackModal('${lesson.id}', '${lesson.title.replace(/'/g, "\\'")}')" style="margin-top:15px; width:100%; padding:8px; border-radius:10px; border:1px solid rgba(245,158,11,0.2); background:rgba(245,158,11,0.03); color:#f59e0b; font-size:12px; font-weight:700; cursor:pointer;">📝 ملاحظة على هذا الملخص</button>
+                </div>
+              `;
+          }
+        });
+      });
+
+      renderScreen(`
+        <div class="screen active" id="summaryDetailScreen">
+          <div class="screen-scroll">
+            <div class="screen-header" style="justify-content:space-between; margin-bottom:15px;">
+              <button onclick="goBackFromSummaryDetail()" style="background:none; border:none; color:var(--blue-light); font-weight:700; cursor:pointer; font-size:14px; display:flex; align-items:center; gap:5px;">
+                🔙 رجوع
+              </button>
+              <div class="header-greeting" style="flex:1; text-align:center;">
+                <div class="greeting-main" style="font-size:16px;">ملخصات ${subj.name}</div>
+              </div>
+              <div style="width:50px;"></div>
+            </div>
+
+            <!-- أدوات التحكم بالخط لهذه الشاشة -->
+            <div style="display:flex; justify-content:center; gap:8px; margin-bottom:20px; padding:10px; background:rgba(255,255,255,0.02); border-radius:15px; border:1px solid var(--glass-border);">
+              <button onclick="changeAllSummariesFont(2)" style="flex:1; padding:8px; border-radius:10px; border:none; background:var(--blue-bright); color:white; cursor:pointer; font-weight:700; font-size:13px;">➕ تكبير الخط</button>
+              <button onclick="changeAllSummariesFont(-2)" style="flex:1; padding:8px; border-radius:10px; border:none; background:var(--bg-mid); border:1px solid var(--glass-border); color:white; cursor:pointer; font-weight:700; font-size:13px;">➖ تصغير</button>
+            </div>
+
+            <div id="allSummariesContainer">
+              ${summariesHTML || '<p style="text-align:center; padding:50px; color:var(--text-muted);">لا توجد ملخصات متاحة لهذه المادة حالياً.</p>'}
+            </div>
+            
+            <div style="height:50px;"></div>
+          </div>
+        </div>
+      `);
+    }
+
+    // دالة التحكم بخط جميع الملخصات في هذه الشاشة
+    let globalSummaryFontSize = 16;
+    function changeAllSummariesFont(delta) {
+        globalSummaryFontSize = Math.max(12, Math.min(32, globalSummaryFontSize + delta));
+        const boxes = document.querySelectorAll('.summary-text-box');
+        boxes.forEach(box => {
+            box.style.fontSize = globalSummaryFontSize + 'px';
+        });
+    }
+
+    function goBackFromSummaryDetail() {
+      navigationStack.pop();
+      switchTab('summary');
+    }
+
+    // ==================== PROFILE SCREEN ====================
+    async function showProfileScreen() {
+      currentScreen = 'profile';
+      const gradeLabel = userData.gradeId === 'g9' ? 'التاسع أساسي' : 'الثالث ثانوي';
+      const studentId = `IJT-${String(userData.phone || '0000').slice(-4)}-${Date.now().toString(36).slice(-4).toUpperCase()}`;
+      const progress = await getOverallProgress();
+      const themeIcon7 = getTheme() === 'dark' ? '☀️' : '🌙';
+      const themeLabel7 = getTheme() === 'dark' ? 'نهاري' : 'ليلي';
+
+      const profileLink = `${window.location.origin}/profile-view.html?uid=${auth.currentUser.uid}`;
+      const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(profileLink)}`;
+
+      renderScreen(`
+        <div class="screen active" id="profileScreen">
+          <div class="screen-scroll">
+            <div class="screen-header" style="justify-content:space-between;">
+              <div id="adminDashLink"></div>
+              <div class="header-greeting" style="text-align:center; flex:1;">
+                <div class="greeting-main">👤 حسابي</div>
+              </div>
+              <button class="theme-toggle-btn" onclick="toggleTheme()" title="تغيير الوضع إلى ${themeLabel7}">${themeIcon7}</button>
+            </div>
+            <div class="profile-avatar-lg" id="profileAvatarContainer">
+                ${userData.avatar && userData.avatar.startsWith('data:image/') 
+                    ? `<img src="${userData.avatar}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">` 
+                    : userData.avatar || '🧑‍🎓'}
+            </div>
+            <div style="text-align:center; font-size:24px; font-weight:900; color:#ffffff; margin-bottom:4px; letter-spacing:-0.5px;">
+                ${userData.name || 'طالب الأكاديمية'}
+            </div>
+            <div style="text-align:center; font-size:13px; color:var(--blue-light); font-weight:600; opacity:0.8; margin-bottom:20px;">
+              <span style="background:rgba(59,130,246,0.15); padding:4px 12px; border-radius:12px; border:1px solid rgba(59,130,246,0.2);">${gradeLabel}</span>
+            </div>
+            
+            <!-- زر التعديل الأنيق -->
+            <div style="text-align:center; margin-bottom:20px;">
+              <button class="action-btn" onclick="openEditProfile()" style="background:linear-gradient(135deg, var(--blue-bright), var(--teal)); color:white; border:none; padding:10px 24px; border-radius:20px; font-weight:700; display:inline-flex; align-items:center; gap:8px; box-shadow:0 8px 15px rgba(59,130,246,0.3); transition:0.3s; transform:scale(1);">
+                <span>✏️ تعديل الملف الشخصي</span>
+              </button>
+            </div>
+            <div style="display:flex; flex-direction:column; align-items:center; gap:12px; padding:24px; background:rgba(255,255,255,0.03); border-radius:24px; border:1px solid var(--glass-border); margin:0 20px 20px;">
+              <div style="background:white; padding:12px; border-radius:16px; box-shadow:0 10px 30px rgba(0,0,0,0.3); line-height:0;">
+                <img src="${qrUrl}" alt="QR Code" style="width:150px; height:150px; display:block;">
+              </div>
+              <div style="text-align:center;">
+                <div style="font-size:14px; font-weight:800; color:var(--text-primary); margin-bottom:2px;">كود التعريف الذكي (QR)</div>
+                <div style="font-size:11px; color:var(--text-muted); opacity:0.8;">امسح الكود لعرض إنجازات الطالب</div>
+              </div>
+            </div>
+
+            <!-- معلومات الطالب (للعرض فقط) -->
+            <div class="profile-info-row">
+              <span class="info-icon">📱</span>
+              <div>
+                <div class="info-label">رقم الهاتف</div>
+                <div class="info-value" dir="ltr">${userData.phone || 'غير مسجل'}</div>
+              </div>
+            </div>
+            ${userData.role === 'student' ? `
+            <div class="profile-info-row">
+              <span class="info-icon">🆔</span>
+              <div>
+                <div class="info-label">رقم الطالب على المنصة</div>
+                <div class="info-value">${userData.studentId || 'جاري التوليد...'}</div>
+              </div>
+            </div>
+            <div class="profile-info-row">
+              <span class="info-icon">📊</span>
+              <div>
+                <div class="info-label">التقدم العام</div>
+                <div class="info-value">${progress.percent}% (${progress.completed}/${progress.total} درس)</div>
+              </div>
+            </div>
+            ` : ''}
+
+            <!-- قسم سجل الدرجات والتقارير -->
+            <div style="margin:0 20px 20px; padding:20px; background:linear-gradient(135deg, rgba(59,130,246,0.1), rgba(20,184,166,0.1)); border-radius:24px; border:1px solid var(--glass-border); text-align:center;">
+              <div style="font-size:13px; color:var(--text-muted); margin-bottom:12px;">تتبع المستوى الأكاديمي بالتفصيل</div>
+              <button onclick="showStudentGrades()" class="premium-btn" style="width:100%; background:linear-gradient(135deg, #6366f1, #a855f7); color:white; border:none; padding:16px; border-radius:20px; font-weight:900; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:12px; box-shadow:0 10px 25px rgba(99,102,241,0.3); transition:all 0.3s; transform:scale(1); border:1px solid rgba(255,255,255,0.1); position:relative; overflow:hidden;">
+                <div style="position:absolute; top:-50%; left:-50%; width:200%; height:200%; background:radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%); pointer-events:none;"></div>
+                <span style="font-size:20px;">📊</span>
+                <span style="letter-spacing:0.5px;">عرض سجل الدرجات والمعدل</span>
+              </button>
+              <style>
+                .premium-btn:hover { transform: translateY(-3px) scale(1.02); box-shadow: 0 15px 30px rgba(99,102,241,0.4); }
+                .premium-btn:active { transform: translateY(0) scale(0.98); }
+              </style>
+            </div>
+
+            <div style="margin-top:20px; text-align:center; padding:0 20px;">
+              <button onclick="logout()" style="width:100%; background:rgba(248,113,113,0.05); color:#f87171; border:1px solid rgba(248,113,113,0.2); padding:14px; border-radius:18px; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px; transition:0.3s; font-size:14px;">
+                <span style="font-size:18px;">🚪</span>
+                <span>تسجيل الخروج من الحساب</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- نافذة تعديل البيانات المطورة -->
+        <div id="editProfileModal" class="modal">
+          <div class="modal-content" style="max-width:400px; padding:24px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                <h3 style="margin:0;">✨ تعديل بياناتي</h3>
+                <button onclick="closeEditProfile()" style="background:none; border:none; font-size:20px; color:var(--text-muted); cursor:pointer;">✕</button>
+            </div>
+
+            <!-- اختيار الصورة -->
+            <div style="text-align:center; margin-bottom:20px;">
+              <div id="editAvatarPreview" style="width:80px; height:80px; border-radius:50%; background:var(--bg-body); margin:0 auto 12px; display:flex; align-items:center; justify-content:center; font-size:40px; border:2px solid var(--blue-bright); overflow:hidden; transition:0.3s;">
+                ${userData.avatar && userData.avatar.startsWith('data:image/') ? `<img src="${userData.avatar}" style="width:100%;height:100%;object-fit:cover;">` : userData.avatar || '🧑‍🎓'}
+              </div>
+              <div style="display:flex; flex-direction:column; gap:12px; align-items:center;">
+                <input type="file" id="editAvatarFile" hidden accept="image/*" onchange="handleProfileImageUpload(this)">
+                <button class="btn-sm" onclick="document.getElementById('editAvatarFile').click()" style="padding:8px 20px; font-size:13px; background:var(--blue-bright); width:100%;">🖼️ رفع صورة حقيقية</button>
+                
+                <button class="btn-sm" onclick="openCustomEmojiPicker()" style="padding:8px 20px; font-size:13px; background:var(--bg-card); width:100%; border:1px solid var(--glass-border);">😃 اختر إيموجي من لوحة المفاتيح</button>
+              </div>
+            </div>
+
+            <div style="margin-bottom:12px;">
+              <label style="display:block; font-size:12px; margin-bottom:4px; color:var(--text-muted);">الاسم الكامل</label>
+              <input type="text" id="editName" value="${userData.name || ''}" placeholder="أدخل اسمك الحقيقي" style="width:100%; padding:12px; border-radius:10px; background:var(--bg-body); border:1px solid var(--glass-border); color:var(--text-primary); outline:none;">
+            </div>
+
+            <div style="margin-bottom:16px;">
+              <label style="display:block; font-size:12px; margin-bottom:4px; color:var(--text-muted);">رقم الهاتف</label>
+              <input type="text" id="editPhone" value="${userData.phone || ''}" placeholder="7XXXXXXXX" style="width:100%; padding:12px; border-radius:10px; background:var(--bg-body); border:1px solid var(--glass-border); color:var(--text-primary); outline:none;">
+            </div>
+
+            <!-- معلومات إضافية للعرض فقط داخل النافذة -->
+            <div style="background:rgba(255,255,255,0.02); padding:12px; border-radius:12px; border:1px solid var(--glass-border); margin-bottom:20px;">
+                <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+                    <span style="font-size:11px; color:var(--text-muted);">🆔 رقم المنصة:</span>
+                    <span style="font-size:11px; color:var(--blue-light); font-weight:700;">${studentId}</span>
+                </div>
+                <div style="display:flex; justify-content:space-between;">
+                    <span style="font-size:11px; color:var(--text-muted);">📊 التقدم العام:</span>
+                    <span style="font-size:11px; color:var(--teal); font-weight:700;">${progress.percent}% (${progress.completed} درس)</span>
+                </div>
+            </div>
+
+            <button class="btn-sm" id="saveProfileBtn" onclick="saveProfileChanges()" style="width:100%; padding:14px; background:linear-gradient(90deg, var(--blue-bright), var(--teal)); font-weight:800;">حفظ التغييرات</button>
+          </div>
+        </div>
+
+        <!-- نافذة اختيار الإيموجي المخصصة -->
+        <div id="customEmojiModal" class="modal" style="z-index: 20000;">
+          <div class="modal-content" style="max-width:300px; text-align:center;">
+            <h4 style="margin-bottom:15px;">اختر إيموجي جديد</h4>
+            <input type="text" id="customEmojiInput" maxlength="2" style="width:60px; height:60px; font-size:30px; text-align:center; border-radius:12px; background:var(--bg-body); border:2px solid var(--blue-bright); color:white; margin-bottom:20px; outline:none;">
+            <p style="font-size:11px; color:var(--text-muted); margin-bottom:15px;">استخدم لوحة مفاتيح هاتفك لاختيار أي إيموجي</p>
+            <div style="display:flex; gap:10px;">
+              <button class="btn-sm" onclick="confirmCustomEmoji()" style="flex:1;">تأكيد</button>
+              <button class="btn-sm" onclick="closeCustomEmojiPicker()" style="flex:1; background:var(--bg-card);">إلغاء</button>
+            </div>
+          </div>
+        </div>
+      `);
+    }
+
+    let tempAvatar = null;
+
+    function openEditProfile() {
+      tempAvatar = userData.avatar;
+      document.getElementById('editProfileModal').classList.add('active');
+    }
+
+    function openCustomEmojiPicker() {
+        document.getElementById('customEmojiModal').classList.add('active');
+        const input = document.getElementById('customEmojiInput');
+        input.value = '';
+        setTimeout(() => input.focus(), 100);
+    }
+
+    function closeCustomEmojiPicker() {
+        document.getElementById('customEmojiModal').classList.remove('active');
+    }
+
+    function confirmCustomEmoji() {
+        const val = document.getElementById('customEmojiInput').value.trim();
+        if (val) {
+            tempAvatar = val;
+            document.getElementById('editAvatarPreview').innerHTML = val;
+            closeCustomEmojiPicker();
+        } else {
+            showToast('يرجى اختيار إيموجي', 'error');
+        }
+    }
+
+    function closeEditProfile() {
+      document.getElementById('editProfileModal').classList.remove('active');
+    }
+
+    function handleProfileImageUpload(input) {
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                tempAvatar = e.target.result;
+                document.getElementById('editAvatarPreview').innerHTML = `<img src="${tempAvatar}" style="width:100%;height:100%;object-fit:cover;">`;
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    async function saveProfileChanges() {
+      const btn = document.getElementById('saveProfileBtn');
+      const newName = document.getElementById('editName').value.trim();
+      const newPhone = document.getElementById('editPhone').value.trim();
+      
+      if (!newName) {
+        showToast('يرجى إدخال اسمك', 'error');
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = 'جاري الحفظ...';
+
+      try {
+        await db.collection('users').doc(auth.currentUser.uid).update({
+          name: newName,
+          phone: newPhone,
+          avatar: tempAvatar || userData.avatar
+        });
+        
+        userData.name = newName;
+        userData.phone = newPhone;
+        userData.avatar = tempAvatar || userData.avatar;
+        
+        showToast('تم تحديث ملفك بنجاح! ✨', 'success');
+        closeEditProfile();
+        showProfileScreen(); 
+      } catch (e) {
+        console.error(e);
+        showToast('فشل في حفظ البيانات', 'error');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'حفظ التغييرات';
+      }
+    }
+
+    // ==================== INITIALIZATION ====================
+    async function initApp() {
+      // إظهار شاشة Splash أولاً
+      showSplash();
+      // التأكد من تهيئة البيانات من السحاب
+      await DB.getSubjects();
+    }
+
+    // مستمع الرجوع الذكي
+    window.addEventListener('popstate', async (e) => {
+        // إذا لم توجد حالة (وصلنا لبداية تاريخ الدخول للتطبيق)
+        if (!e.state) {
+            // نمنع الخروج ونثبت المستخدم في الرئيسية
+            history.pushState({ type: 'tab', tab: 'home' }, '', '');
+            await switchTab('home', false);
+            return;
+        }
+
+        const state = e.state;
+        if (state.type === 'tab') {
+            await switchTab(state.tab, false);
+        } else if (state.type === 'subject') {
+            await openSubject(state.subjId);
+        } else if (state.type === 'lesson') {
+            await openLessonView(state.subjId, state.unitIdx, state.lessonId);
+        }
+    });
+
+    // ==================== نظام تقارير الدرجات (للطالب وولي الأمر) ====================
+    async function showStudentGrades(targetUid = null) {
+      const uid = targetUid || auth.currentUser.uid;
+      showToast('جاري تحميل التقرير...', 'info');
+      
+      try {
+        const snapshot = await db.collection('quizResults')
+          .where('studentId', '==', uid)
+          .get();
+          
+        let totalPercentage = 0;
+        let count = 0;
+        let rowsHTML = '';
+        
+        const results = [];
+        snapshot.forEach(doc => results.push(doc.data()));
+        results.sort((a,b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
+
+        results.forEach(res => {
+          totalPercentage += res.percentage;
+          count++;
+          const date = res.timestamp ? res.timestamp.toDate().toLocaleDateString('ar-EG') : '---';
+          rowsHTML += `
+            <div style="background:var(--bg-card); padding:15px; border-radius:15px; margin-bottom:10px; border:1px solid var(--glass-border); display:flex; justify-content:space-between; align-items:center;">
+              <div>
+                <div style="font-weight:800; font-size:14px; color:var(--text-primary);">${res.lessonTitle}</div>
+                <div style="font-size:11px; color:var(--text-muted);">${date}</div>
+              </div>
+              <div style="text-align:right;">
+                <div style="font-size:16px; font-weight:800; color:${res.percentage >= 70 ? '#10b981' : '#f87171'};">${res.percentage}%</div>
+                <div style="font-size:11px; color:var(--text-muted);">${res.score}/${res.total}</div>
+              </div>
+            </div>
+          `;
+        });
+        
+        const avg = count > 0 ? Math.round(totalPercentage / count) : 0;
+        const statusText = avg >= 90 ? 'ممتاز 🌟' : avg >= 80 ? 'جيد جداً 👍' : avg >= 70 ? 'جيد 🆗' : 'يحتاج تحسين 🛠️';
+
+        navigationStack.push({ screen: 'gradesReport' });
+        currentScreen = 'gradesReport';
+
+        renderScreen(`
+          <div class="screen active" id="gradesScreen">
+            <div class="screen-scroll">
+              <div class="screen-header" style="justify-content:space-between; margin-bottom:20px;">
+                <button onclick="goBackFromGrades()" style="background:none; border:none; color:var(--blue-light); font-weight:700; cursor:pointer; font-size:14px;">🔙 رجوع</button>
+                <div class="greeting-main" style="font-size:16px;">📊 تقرير الأداء</div>
+                <div style="width:40px;"></div>
+              </div>
+
+              <div style="background:linear-gradient(135deg, var(--blue-bright), var(--teal)); border-radius:24px; padding:30px; text-align:center; color:white; margin-bottom:25px; box-shadow:0 15px 35px rgba(59,130,246,0.3);">
+                <div style="font-size:14px; opacity:0.9; margin-bottom:8px; letter-spacing:1px;">المعدل التراكمي</div>
+                <div style="font-size:54px; font-weight:900; line-height:1;">${avg}%</div>
+                <div style="font-size:18px; font-weight:700; margin-top:12px; background:rgba(255,255,255,0.2); display:inline-block; padding:4px 15px; border-radius:20px;">${statusText}</div>
+                <div style="font-size:12px; opacity:0.8; margin-top:15px;">تم خوض ${count} اختبارات تعليمية</div>
+              </div>
+
+              <h3 style="font-size:16px; margin-bottom:15px; color:var(--text-primary); display:flex; align-items:center; gap:8px;">
+                <span>📜</span> سجل الاختبارات التفصيلي
+              </h3>
+              <div style="padding-bottom:50px;">
+                ${rowsHTML || '<p style="text-align:center; color:var(--text-muted); padding:50px; background:rgba(255,255,255,0.02); border-radius:20px;">لا توجد نتائج مسجلة حتى الآن.</p>'}
+              </div>
+            </div>
+          </div>
+        `);
+      } catch (e) {
+        console.error(e);
+        showToast('فشل في تحميل التقرير', 'error');
+      }
+    }
+
+    // ==================== لوحة ولي الأمر ====================
+    function showParentDashboard() {
+      currentScreen = 'parentDashboard';
+      renderScreen(`
+        <div class="screen active" id="parentDashboard">
+          <div class="screen-scroll" style="padding:24px;">
+            <div style="text-align:center; margin-bottom:30px; margin-top:20px;">
+                <div style="font-size:60px; margin-bottom:15px;">👨‍👩‍👧‍👦</div>
+                <h2 style="color:var(--text-primary); font-size:24px; font-weight:900;">لوحة ولي الأمر</h2>
+                <p style="color:var(--text-muted); font-size:14px;">مرحباً بك، تابع مستوى أبنائك التعليمي</p>
+            </div>
+
+            <div style="background:var(--bg-card); border:1px solid var(--glass-border); border-radius:24px; padding:24px; box-shadow:var(--shadow-card);">
+                <label style="display:block; color:var(--text-primary); margin-bottom:12px; font-weight:700; font-size:14px;">أدخل كود الطالب للمتابعة:</label>
+                <input type="text" id="parentStudentId" placeholder="مثال: IJT-4422-X7Y2" style="width:100%; padding:15px; border-radius:15px; background:rgba(255,255,255,0.05); border:1px solid var(--glass-border); color:white; font-size:16px; font-weight:700; text-align:center; margin-bottom:20px; outline:none; letter-spacing:1px;">
+                <button onclick="parentTrackStudent()" style="width:100%; background:linear-gradient(135deg, var(--blue-bright), var(--teal)); color:white; border:none; padding:16px; border-radius:16px; font-weight:800; cursor:pointer; font-size:16px; box-shadow:0 10px 20px rgba(59,130,246,0.3);">
+                   🔍 استخراج النتائج والتقرير
+                </button>
+            </div>
+
+            <div style="margin-top:40px; text-align:center;">
+              <button onclick="logout()" style="background:none; border:none; color:#f87171; font-weight:700; cursor:pointer;">🚪 تسجيل خروج</button>
+            </div>
+          </div>
+        </div>
+      `);
+      // إخفاء شريط التنقل السفلي لولي الأمر
+      const nav = document.querySelector('.bottom-nav');
+      if (nav) nav.style.display = 'none';
+    }
+
+    async function parentTrackStudent() {
+      const sid = document.getElementById('parentStudentId').value.trim().toUpperCase();
+      if (!sid) { showToast('يرجى إدخال الكود', 'error'); return; }
+      
+      showToast('جاري البحث عن الطالب...', 'info');
+      try {
+        const snap = await db.collection('users').where('studentId', '==', sid).get();
+        if (snap.empty) {
+          showToast('عذراً، هذا الكود غير صحيح أو الطالب غير موجود', 'error');
+          return;
+        }
+        const student = snap.docs[0].data();
+        // عرض الدرجات لهذا الطالب تحديداً
+        showStudentGrades(student.uid);
+      } catch (e) {
+        console.error(e);
+        showToast('حدث خطأ أثناء البحث', 'error');
+      }
+    }
+
+    function goBackFromGrades() {
+      navigationStack.pop();
+      if (userData.role === 'parent') {
+        showParentDashboard();
+      } else {
+        showProfileScreen();
+      }
+    }
+
+    // تهيئة التاريخ عند الدخول لأول مرة
+    history.replaceState({ type: 'tab', tab: 'home' }, '', '');
+
+    async function logout() {
+      showCustomConfirm('🚪 تسجيل الخروج', 'هل أنت متأكد من أنك تريد تسجيل الخروج من حسابك؟', async () => {
+        await AuthService.logout();
+        window.location.href = 'login.html';
+      });
+    }
+
+    function showCustomConfirm(title, message, onConfirm) {
+        const modal = document.createElement('div');
+        modal.className = 'modal active';
+        modal.innerHTML = `
+            <div class="modal-content" style="max-width:350px; text-align:center; padding:30px; border:1px solid rgba(248,113,113,0.3);">
+                <div style="font-size:50px; margin-bottom:15px;">⚠️</div>
+                <h3 style="color:var(--text-primary); margin-bottom:10px; font-size:18px;">${title}</h3>
+                <p style="color:var(--text-muted); font-size:14px; margin-bottom:25px; line-height:1.6;">${message}</p>
+                <div style="display:flex; gap:10px;">
+                    <button id="confirmBtn" style="flex:1; padding:12px; border-radius:12px; border:none; background:#f87171; color:white; font-weight:800; cursor:pointer;">نعم، خروج</button>
+                    <button id="cancelBtn" style="flex:1; padding:12px; border-radius:12px; border:1px solid var(--glass-border); background:var(--bg-card); color:var(--text-primary); font-weight:700; cursor:pointer;">إلغاء</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+
+        modal.querySelector('#confirmBtn').onclick = () => {
+            modal.remove();
+            onConfirm();
+        };
+        modal.querySelector('#cancelBtn').onclick = () => {
+            modal.remove();
+        };
+    }
+
+    initApp();
+  </script>
+</body>
+</html>

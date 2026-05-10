@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تسجيل الدخول - أكاديمية اجتهاد</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-deep: #020817;
+            --bg-dark: #0f172a;
+            --bg-card: rgba(30, 41, 59, 0.6);
+            --blue-main: #3b82f6;
+            --blue-bright: #60a5fa;
+            --blue-glow: #2563eb;
+            --teal: #10b981;
+            --gold: #f59e0b;
+            --red: #ef4444;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --glass-border: rgba(255,255,255,0.08);
+            --radius: 16px;
+        }
+        * { margin:0; padding:0; box-sizing:border-box; font-family:'Cairo',sans-serif; }
+
+        body {
+            background: var(--bg-deep);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Animated Background */
+        .bg-animation {
+            position: fixed; inset: 0; z-index: 0; overflow: hidden;
+        }
+        .bg-orb {
+            position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.15; animation: orbFloat 12s ease-in-out infinite;
+        }
+        .bg-orb:nth-child(1) { width:500px; height:500px; background:#3b82f6; top:-10%; right:-10%; animation-delay:0s; }
+        .bg-orb:nth-child(2) { width:400px; height:400px; background:#10b981; bottom:-15%; left:-10%; animation-delay:4s; }
+        .bg-orb:nth-child(3) { width:300px; height:300px; background:#8b5cf6; top:50%; left:50%; animation-delay:8s; }
+        @keyframes orbFloat {
+            0%,100% { transform: translate(0,0) scale(1); }
+            33% { transform: translate(30px,-40px) scale(1.1); }
+            66% { transform: translate(-20px,30px) scale(0.95); }
+        }
+
+        /* Grid Pattern */
+        .bg-grid {
+            position: fixed; inset: 0; z-index: 0;
+            background-image: linear-gradient(rgba(59,130,246,0.03) 1px, transparent 1px),
+                              linear-gradient(90deg, rgba(59,130,246,0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+        }
+
+        /* Login Container */
+        .login-container {
+            position: relative; z-index: 10;
+            width: 100%; max-width: 440px;
+            padding: 20px;
+        }
+
+        .login-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(24px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius);
+            padding: 40px 32px;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05);
+        }
+
+        /* Logo */
+        .logo-section {
+            text-align: center; margin-bottom: 32px;
+        }
+        .logo-icon {
+            width: 72px; height: 72px; margin: 0 auto 12px;
+            background: linear-gradient(135deg, var(--blue-main), var(--teal));
+            border-radius: 20px; display: flex; align-items: center; justify-content: center;
+            font-size: 36px; box-shadow: 0 8px 24px rgba(59,130,246,0.3);
+            animation: logoPulse 3s ease-in-out infinite;
+        }
+        @keyframes logoPulse {
+            0%,100% { box-shadow: 0 8px 24px rgba(59,130,246,0.3); }
+            50% { box-shadow: 0 8px 40px rgba(59,130,246,0.5); }
+        }
+        .logo-title { font-size: 22px; font-weight: 800; color: var(--text-primary); }
+        .logo-sub { font-size: 13px; color: var(--text-secondary); margin-top: 2px; }
+
+        /* Tabs */
+        .auth-tabs {
+            display: flex; background: rgba(15,23,42,0.5); border-radius: 12px;
+            padding: 4px; margin-bottom: 28px; border: 1px solid var(--glass-border);
+        }
+        .auth-tab {
+            flex: 1; padding: 10px; text-align: center; border-radius: 10px;
+            font-size: 14px; font-weight: 700; color: var(--text-muted);
+            cursor: pointer; transition: all 0.3s;
+        }
+        .auth-tab.active {
+            background: linear-gradient(135deg, var(--blue-main), var(--blue-glow));
+            color: #fff; box-shadow: 0 4px 12px rgba(59,130,246,0.3);
+        }
+
+        /* Form */
+        .auth-form { display: none; }
+        .auth-form.active { display: block; animation: fadeSlide 0.4s ease; }
+        @keyframes fadeSlide { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+
+        .form-group { margin-bottom: 18px; }
+        .form-label {
+            display: block; font-size: 13px; font-weight: 600;
+            color: var(--text-secondary); margin-bottom: 6px;
+        }
+        .form-input {
+            width: 100%; padding: 12px 16px; border-radius: 12px;
+            border: 1px solid var(--glass-border); background: rgba(15,23,42,0.6);
+            color: var(--text-primary); font-size: 14px; font-family: 'Cairo';
+            transition: all 0.3s; outline: none;
+        }
+        .form-input:focus {
+            border-color: var(--blue-main);
+            box-shadow: 0 0 0 3px rgba(59,130,246,0.15);
+        }
+        .form-input::placeholder { color: var(--text-muted); }
+
+        /* Role Select */
+        .role-selector {
+            display: flex; gap: 10px; margin-bottom: 18px;
+        }
+        .role-option {
+            flex: 1; padding: 14px 10px; border-radius: 12px; text-align: center;
+            border: 2px solid var(--glass-border); background: rgba(15,23,42,0.4);
+            cursor: pointer; transition: all 0.3s;
+        }
+        .role-option:hover { border-color: rgba(59,130,246,0.3); }
+        .role-option.selected {
+            border-color: var(--blue-main); background: rgba(59,130,246,0.1);
+        }
+        .role-option .role-icon { font-size: 28px; margin-bottom: 4px; }
+        .role-option .role-name { font-size: 13px; font-weight: 700; color: var(--text-primary); }
+
+        /* Grade Select */
+        .grade-row { display: none; }
+        .grade-row.visible { display: block; }
+        .form-select {
+            width: 100%; padding: 12px 16px; border-radius: 12px;
+            border: 1px solid var(--glass-border); background: rgba(15,23,42,0.6);
+            color: var(--text-primary); font-size: 14px; font-family: 'Cairo';
+            outline: none; cursor: pointer;
+        }
+        .form-select option { background: #1e293b; }
+
+        /* Button */
+        .btn-auth {
+            width: 100%; padding: 14px; border: none; border-radius: 12px;
+            font-size: 16px; font-weight: 800; font-family: 'Cairo';
+            color: #fff; cursor: pointer; transition: all 0.3s;
+            background: linear-gradient(135deg, var(--blue-main), var(--blue-glow));
+            box-shadow: 0 4px 16px rgba(59,130,246,0.3);
+            position: relative; overflow: hidden;
+        }
+        .btn-auth:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(59,130,246,0.4); }
+        .btn-auth:active { transform: translateY(0); }
+        .btn-auth:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+        /* Loading Spinner */
+        .btn-auth .spinner {
+            display: none; width: 20px; height: 20px; border: 3px solid rgba(255,255,255,0.3);
+            border-top-color: #fff; border-radius: 50%; animation: spin 0.8s linear infinite;
+            margin: 0 auto;
+        }
+        .btn-auth.loading .btn-text { display: none; }
+        .btn-auth.loading .spinner { display: block; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Alert */
+        .alert {
+            padding: 12px 16px; border-radius: 10px; font-size: 13px; font-weight: 600;
+            margin-bottom: 16px; display: none; animation: fadeSlide 0.3s ease;
+        }
+        .alert.error { display: block; background: rgba(239,68,68,0.12); color: #f87171; border: 1px solid rgba(239,68,68,0.2); }
+        .alert.success { display: block; background: rgba(16,185,129,0.12); color: #34d399; border: 1px solid rgba(16,185,129,0.2); }
+
+        /* Divider */
+        .divider {
+            display: flex; align-items: center; gap: 12px;
+            margin: 20px 0; color: var(--text-muted); font-size: 12px;
+        }
+        .divider::before, .divider::after { content:''; flex:1; height:1px; background:var(--glass-border); }
+
+        /* Footer */
+        .login-footer {
+            text-align: center; margin-top: 20px; font-size: 12px; color: var(--text-muted);
+        }
+        .login-footer a { color: var(--blue-bright); text-decoration: none; font-weight: 600; }
+
+        /* Responsive */
+        @media (max-width: 480px) {
+            .login-card { padding: 28px 20px; }
+            .logo-icon { width: 60px; height: 60px; font-size: 28px; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Background -->
+    <div class="bg-animation">
+        <div class="bg-orb"></div>
+        <div class="bg-orb"></div>
+        <div class="bg-orb"></div>
+    </div>
+    <div class="bg-grid"></div>
+
+    <!-- Login Card -->
+    <div class="login-container">
+        <div class="login-card">
+            <div class="logo-section">
+                <div class="logo-icon">📚</div>
+                <div class="logo-title">أكاديمية اجتهاد</div>
+                <div class="logo-sub">منصة التعلم الذكي</div>
+            </div>
+
+            <!-- Tabs -->
+            <div class="auth-tabs">
+                <div class="auth-tab active" onclick="switchAuthTab('login')">تسجيل الدخول</div>
+                <div class="auth-tab" onclick="switchAuthTab('register')">حساب جديد</div>
+            </div>
+
+            <!-- Alert -->
+            <div class="alert" id="alertBox"></div>
+
+            <!-- Login Form -->
+            <form class="auth-form active" id="loginForm" onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label class="form-label">البريد الإلكتروني</label>
+                    <input type="email" class="form-input" id="loginEmail" placeholder="example@email.com" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">كلمة المرور</label>
+                    <input type="password" class="form-input" id="loginPassword" placeholder="••••••••" required minlength="6">
+                </div>
+                <button type="submit" class="btn-auth" id="loginBtn">
+                    <span class="btn-text">🔐 تسجيل الدخول</span>
+                    <div class="spinner"></div>
+                </button>
+            </form>
+
+            <!-- Register Form -->
+            <form class="auth-form" id="registerForm" onsubmit="handleRegister(event)">
+                <div class="form-group">
+                    <label class="form-label">الاسم الكامل</label>
+                    <input type="text" class="form-input" id="regName" placeholder="أدخل اسمك" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">البريد الإلكتروني</label>
+                    <input type="email" class="form-input" id="regEmail" placeholder="example@email.com" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">كلمة المرور</label>
+                    <input type="password" class="form-input" id="regPassword" placeholder="6 أحرف على الأقل" required minlength="6">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">نوع الحساب</label>
+                    <select class="form-select" id="regRole" onchange="toggleGradeRow()" required>
+                        <option value="student">👨‍🎓 طالب</option>
+                        <option value="parent">👨‍👩‍👧‍👦 ولي أمر</option>
+                    </select>
+                </div>
+
+                <div class="form-group" id="gradeRow">
+                    <label class="form-label">الصف الدراسي</label>
+                    <select class="form-select" id="regGrade" required>
+                        <option value="g9">التاسع أساسي</option>
+                        <option value="g12">الثالث ثانوي</option>
+                    </select>
+                </div>
+
+                <script>
+                    function toggleGradeRow() {
+                        const role = document.getElementById('regRole').value;
+                        const row = document.getElementById('gradeRow');
+                        row.style.display = (role === 'student') ? 'block' : 'none';
+                        const gradeSelect = document.getElementById('regGrade');
+                        if (role === 'parent') {
+                            gradeSelect.removeAttribute('required');
+                        } else {
+                            gradeSelect.setAttribute('required', 'required');
+                        }
+                    }
+                </script>
+
+                <button type="submit" class="btn-auth" id="registerBtn">
+                    <span class="btn-text">✨ إنشاء الحساب</span>
+                    <div class="spinner"></div>
+                </button>
+            </form>
+
+            <div class="login-footer">
+                <p>أكاديمية اجتهاد &copy; 2026</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+    <script src="firebase-config.js"></script>
+
+    <script>
+        let isRegistering = false; // قفل أمان لمنع التداخل أثناء التسجيل
+
+        // التحقق إذا كان المستخدم مسجل دخوله بالفعل
+        AuthService.onAuthChanged(async (user) => {
+            if (isRegistering) return; // إذا كنا نسجل الآن، لا تفعل شيئاً
+
+            if (user) {
+                const userData = await AuthService.getUserData(user.uid);
+                if (userData) {
+                    if (userData.role === 'admin') {
+                        window.location.href = 'admin.html';
+                    } else {
+                        window.location.href = 'stageone.html';
+                    }
+                } else {
+                    // إذا لم تكن البيانات موجودة بعد، ننتظر قليلاً أو نظهر رسالة
+                    console.log("Waiting for user data...");
+                }
+            }
+        });
+
+        function switchAuthTab(tab) {
+            document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active'));
+            hideAlert();
+
+            if (tab === 'login') {
+                document.querySelectorAll('.auth-tab')[0].classList.add('active');
+                document.getElementById('loginForm').classList.add('active');
+            } else {
+                document.querySelectorAll('.auth-tab')[1].classList.add('active');
+                document.getElementById('registerForm').classList.add('active');
+            }
+        }
+
+        function showAlert(msg, type) {
+            const box = document.getElementById('alertBox');
+            box.textContent = msg;
+            box.className = 'alert ' + type;
+        }
+        function hideAlert() {
+            document.getElementById('alertBox').className = 'alert';
+        }
+
+        function setLoading(btnId, loading) {
+            const btn = document.getElementById(btnId);
+            btn.classList.toggle('loading', loading);
+            btn.disabled = loading;
+        }
+
+        async function handleLogin(e) {
+            e.preventDefault();
+            hideAlert();
+            setLoading('loginBtn', true);
+
+            const email = document.getElementById('loginEmail').value.trim();
+            const password = document.getElementById('loginPassword').value;
+
+            const result = await AuthService.login(email, password);
+
+            if (result.success) {
+                showAlert('تم تسجيل الدخول بنجاح! جاري التحويل...', 'success');
+            } else {
+                showAlert(result.error, 'error');
+                setLoading('loginBtn', false);
+            }
+        }
+
+        async function handleRegister(e) {
+            e.preventDefault();
+            hideAlert();
+            setLoading('registerBtn', true);
+
+            isRegistering = true; // تفعيل القفل
+
+            const name = document.getElementById('regName').value.trim();
+            const email = document.getElementById('regEmail').value.trim();
+            const password = document.getElementById('regPassword').value;
+            const role = document.getElementById('regRole').value;
+            const gradeId = (role === 'student') ? document.getElementById('regGrade').value : 'parent_mode';
+
+            const result = await AuthService.register(email, password, {
+                name, 
+                role: role,
+                gradeId: gradeId
+            });
+
+            if (result.success) {
+                showAlert('تم إنشاء الحساب بنجاح! جاري التحويل...', 'success');
+                setTimeout(() => {
+                    isRegistering = false; // فك القفل قبل التحويل
+                    window.location.href = 'stageone.html';
+                }, 1500);
+            } else {
+                isRegistering = false;
+                showAlert(result.error, 'error');
+                setLoading('registerBtn', false);
+            }
+        }
+    </script>
+</body>
+</html>
