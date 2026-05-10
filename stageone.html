@@ -2825,8 +2825,8 @@
         closeEditProfile();
         showProfileScreen(); 
       } catch (e) {
-        console.error(e);
-        showToast('فشل في حفظ البيانات', 'error');
+        console.error("Profile Save Error:", e);
+        showToast('فشل الحفظ: ' + (e.message || 'خطأ غير معروف'), 'error');
       } finally {
         btn.disabled = false;
         btn.textContent = 'حفظ التغييرات';
