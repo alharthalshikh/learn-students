@@ -1449,6 +1449,11 @@
                 if (user.email === 'alharth465117@gmail.com') {
                     userData.role = 'admin';
                 }
+
+                // استرجاع الاسم من التخزين المحلي كنسخة احتياطية
+                const savedName = localStorage.getItem('user_name_' + user.uid);
+                if (savedName) userData.name = savedName;
+
                 if (userData.role === 'student' && !userData.studentId) {
                     const sid = `IJT-${String(userData.phone || '0000').slice(-4)}-${Math.random().toString(36).slice(-4).toUpperCase()}`;
                     userData.studentId = sid;
@@ -2820,10 +2825,14 @@
         userData.name = newName;
         userData.phone = newPhone;
         userData.avatar = tempAvatar || userData.avatar;
+        localStorage.setItem('user_name_' + user.uid, newName);
         
-        showToast('تم تحديث ملفك بنجاح! ✨', 'success');
+        showToast('تم حفظ التغييرات بنجاح! ✨', 'success');
         closeEditProfile();
         showProfileScreen(); 
+
+        const greetingEl = document.querySelector('.greeting-main');
+        if (greetingEl) greetingEl.textContent = `أهلاً بك، ${newName} 👋`;
       } catch (e) {
         console.error("Profile Save Error:", e);
         showToast('فشل الحفظ: ' + (e.message || 'خطأ غير معروف'), 'error');
