@@ -2809,11 +2809,13 @@
       btn.textContent = 'جاري الحفظ...';
 
       try {
-        await db.collection('users').doc(auth.currentUser.uid).update({
+        const user = auth.currentUser;
+        await db.collection('users').doc(user.uid).update({
           name: newName,
           phone: newPhone,
           avatar: tempAvatar || userData.avatar
         });
+        await user.updateProfile({ displayName: newName });
         
         userData.name = newName;
         userData.phone = newPhone;
