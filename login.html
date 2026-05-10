@@ -262,6 +262,10 @@
                     <input type="email" class="form-input" id="regEmail" placeholder="example@email.com" required>
                 </div>
                 <div class="form-group">
+                    <label class="form-label">رقم الهاتف</label>
+                    <input type="tel" class="form-input" id="regPhone" placeholder="771234567" required>
+                </div>
+                <div class="form-group">
                     <label class="form-label">كلمة المرور</label>
                     <input type="password" class="form-input" id="regPassword" placeholder="6 أحرف على الأقل" required minlength="6">
                 </div>
@@ -392,12 +396,14 @@
 
             const name = document.getElementById('regName').value.trim();
             const email = document.getElementById('regEmail').value.trim();
+            const phone = document.getElementById('regPhone').value.trim();
             const password = document.getElementById('regPassword').value;
             const role = document.getElementById('regRole').value;
             const gradeId = (role === 'student') ? document.getElementById('regGrade').value : 'parent_mode';
 
             const result = await AuthService.register(email, password, {
                 name, 
+                phone,
                 role: role,
                 gradeId: gradeId
             });

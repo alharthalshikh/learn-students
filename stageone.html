@@ -1445,9 +1445,22 @@
                 userData = cloudData;
                 authHandled = true; 
 
-                // تثبيت رتبة الأدمن لهذا الحساب محلياً لتجاوز خطأ التصاريح
+                // 🛡️ حماية الأدمن الخارق (الحارث الشيخ)
                 if (user.email === 'alharth465117@gmail.com') {
                     userData.role = 'admin';
+                    userData.name = userData.name || 'الحارث الشيخ';
+                    userData.phone = userData.phone || '771035015';
+                    userData.gradeId = 'admin_master';
+                    
+                    // تحديث قاعدة البيانات لضمان الثبات
+                    if (!cloudData.studentId) {
+                        AuthService.updateUserData(user.uid, { 
+                            role: 'admin', 
+                            name: 'الحارث الشيخ', 
+                            phone: '771035015',
+                            gradeId: 'admin_master'
+                        });
+                    }
                 }
 
                 // استرجاع الاسم من التخزين المحلي كنسخة احتياطية
