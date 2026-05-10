@@ -2630,7 +2630,13 @@
         <div class="screen active" id="profileScreen">
           <div class="screen-scroll">
             <div class="screen-header" style="justify-content:space-between;">
-              <div id="adminDashLink"></div>
+              <div id="adminDashLink">
+                ${userData.role === 'admin' ? `
+                  <button onclick="openAdminDashboard()" style="background:var(--bg-mid); border:1px solid var(--glass-border); color:var(--text-primary); padding:8px 12px; border-radius:12px; font-size:12px; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:5px;">
+                    ⚙️ لوحة التحكم
+                  </button>
+                ` : ''}
+              </div>
               <div class="header-greeting" style="text-align:center; flex:1;">
                 <div class="greeting-main">👤 حسابي</div>
               </div>
@@ -2858,6 +2864,110 @@
         btn.disabled = false;
         btn.textContent = 'حفظ التغييرات';
       }
+    }
+
+    // ==================== ADMIN DASHBOARD ====================
+    async function openAdminDashboard() {
+        currentScreen = 'adminDash';
+        renderScreen(`
+            <div class="screen active" id="adminDashScreen">
+                <div class="screen-scroll">
+                    <div class="screen-header" style="justify-content:space-between; margin-bottom:15px;">
+                        <button onclick="showProfileScreen()" style="background:none; border:none; color:var(--blue-light); font-weight:700; cursor:pointer; font-size:14px;">🔙 رجوع</button>
+                        <div class="header-greeting" style="text-align:center; flex:1;">
+                            <div class="greeting-main" style="font-size:16px;">⚙️ لوحة التحكم</div>
+                        </div>
+                        <div style="width:50px;"></div>
+                    </div>
+
+                    <div style="padding:20px;">
+                        <div style="background:linear-gradient(135deg, var(--blue-main), var(--teal)); padding:20px; border-radius:24px; color:white; margin-bottom:25px; box-shadow:0 15px 35px rgba(26,92,245,0.3);">
+                            <h2 style="font-size:20px; margin-bottom:5px;">أهلاً بك يا مدير 👋</h2>
+                            <p style="font-size:13px; opacity:0.9;">إليك أدوات الإدارة والتحكم في المنصة</p>
+                        </div>
+
+                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px; margin-bottom:25px;">
+                            <div class="admin-card" onclick="openStudentManager()" style="background:var(--bg-card); padding:20px; border-radius:20px; border:1px solid var(--glass-border); text-align:center; cursor:pointer; transition:0.3s;">
+                                <div style="font-size:30px; margin-bottom:10px;">👥</div>
+                                <div style="font-weight:800; font-size:14px;">إدارة الطلاب</div>
+                            </div>
+                            <div class="admin-card" style="background:var(--bg-card); padding:20px; border-radius:20px; border:1px solid var(--glass-border); text-align:center; opacity:0.5;">
+                                <div style="font-size:30px; margin-bottom:10px;">📚</div>
+                                <div style="font-weight:800; font-size:14px;">إدارة المواد</div>
+                            </div>
+                        </div>
+
+                        <div id="adminContentArea">
+                            <!-- المحتوى المتغير يظهر هنا -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `);
+    }
+
+    async function openStudentManager() {
+        const area = document.getElementById('adminContentArea');
+        area.innerHTML = `
+            <div style="background:var(--bg-card); padding:20px; border-radius:24px; border:1px solid var(--glass-border); animation:fadeIn 0.3s ease;">
+                <h3 style="margin-bottom:15px; font-size:16px;">🔍 البحث عن طالب</h3>
+                <div style="display:flex; gap:10px; margin-bottom:20px;">
+                    <input type="text" id="studentSearchInput" placeholder="ادخل الاسم أو رقم الهاتف..." style="flex:1; padding:12px; border-radius:12px; background:var(--bg-body); border:1px solid var(--glass-border); color:white; outline:none;">
+                    <button onclick="searchStudents()" style="padding:10px 20px; border-radius:12px; background:var(--blue-bright); color:white; border:none; font-weight:700; cursor:pointer;">بحث</button>
+                </div>
+                <div id="studentSearchResults" style="display:flex; flex-direction:column; gap:12px;">
+                    <!-- نتائج البحث هنا -->
+                </div>
+            </div>
+        `;
+    }
+
+    async function searchStudents() {
+        const query = document.getElementById('studentSearchInput').value.trim();
+        if (!query) return;
+
+        const resultsArea = document.getElementById('studentSearchResults');
+        resultsArea.innerHTML = '<p style="text-align:center; padding:20px; color:var(--text-muted);">جاري البحث... ⏳</p>';
+
+        try {
+            const snapshot = await db.collection('users')
+                .where('role', '==', 'student')
+                .limit(20)
+                .get();
+
+            let html = '';
+            snapshot.forEach(doc => {
+                const s = doc.data();
+                if (s.name.includes(query) || (s.phone && s.phone.includes(query))) {
+                    html += `
+                        <div style="background:rgba(255,255,255,0.02); padding:15px; border-radius:15px; border:1px solid var(--glass-border); display:flex; justify-content:space-between; align-items:center;">
+                            <div>
+                                <div style="font-weight:700; font-size:14px;">${s.name}</div>
+                                <div style="font-size:11px; color:var(--text-muted);">${s.phone || 'بدون هاتف'} | ${s.email}</div>
+                            </div>
+                            <button onclick="resetStudentPassword('${s.email}')" style="background:rgba(239,68,68,0.1); color:#ef4444; border:1px solid rgba(239,68,68,0.2); padding:6px 12px; border-radius:10px; font-size:11px; font-weight:700; cursor:pointer;">إعادة تعيين 🔑</button>
+                        </div>
+                    `;
+                }
+            });
+
+            resultsArea.innerHTML = html || '<p style="text-align:center; padding:20px; color:var(--text-muted);">لم يتم العثور على نتائج 😕</p>';
+        } catch (e) {
+            console.error(e);
+            resultsArea.innerHTML = '<p style="text-align:center; padding:20px; color:var(--red);">حدث خطأ أثناء البحث</p>';
+        }
+    }
+
+    async function resetStudentPassword(email) {
+        showCustomConfirm('إعادة تعيين كلمة المرور', `هل أنت متأكد من إرسال رابط إعادة تعيين كلمة المرور إلى البريد: ${email}؟`, async () => {
+            try {
+                await auth.sendPasswordResetEmail(email);
+                showToast('تم إرسال رابط إعادة التعيين لبريد الطالب بنجاح! 📧', 'success');
+            } catch (e) {
+                console.error(e);
+                showToast('فشل في إرسال البريد: ' + e.message, 'error');
+            }
+        });
     }
 
     // ==================== INITIALIZATION ====================
